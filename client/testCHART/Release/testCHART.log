@@ -1,0 +1,20 @@
+﻿  Moc'ing testCHART.h...
+  Uic'ing testCHART.ui...
+  Moc'ing qcustomplot.h...
+  Rcc'ing testCHART.qrc...
+RCC : warning : No resources in 'D:\Qt_project\testCHART\testCHART.qrc'.
+  
+  qrc_testCHART.cpp
+  moc_qcustomplot.cpp
+  moc_testCHART.cpp
+  main.cpp
+  qcustomplot.cpp
+  testCHART.cpp
+  正在生成代码...
+qcustomplot.obj : error LNK2019: 无法解析的外部符号 "__declspec(dllimport) public: __thiscall QPrinter::QPrinter(enum QPrinter::PrinterMode)" (__imp_??0QPrinter@@QAE@W4PrinterMode@0@@Z)，该符号在函数 "public: bool __thiscall QCustomPlot::savePdf(class QString const &,int,int,enum QCP::ExportPen,class QString const &,class QString const &)" (?savePdf@QCustomPlot@@QAE_NABVQString@@HHW4ExportPen@QCP@@00@Z) 中被引用
+qcustomplot.obj : error LNK2019: 无法解析的外部符号 "__declspec(dllimport) public: virtual __thiscall QPrinter::~QPrinter(void)" (__imp_??1QPrinter@@UAE@XZ)，该符号在函数 "public: bool __thiscall QCustomPlot::savePdf(class QString const &,int,int,enum QCP::ExportPen,class QString const &,class QString const &)" (?savePdf@QCustomPlot@@QAE_NABVQString@@HHW4ExportPen@QCP@@00@Z) 中被引用
+qcustomplot.obj : error LNK2019: 无法解析的外部符号 "__declspec(dllimport) public: void __thiscall QPrinter::setOutputFormat(enum QPrinter::OutputFormat)" (__imp_?setOutputFormat@QPrinter@@QAEXW4OutputFormat@1@@Z)，该符号在函数 "public: bool __thiscall QCustomPlot::savePdf(class QString const &,int,int,enum QCP::ExportPen,class QString const &,class QString const &)" (?savePdf@QCustomPlot@@QAE_NABVQString@@HHW4ExportPen@QCP@@00@Z) 中被引用
+qcustomplot.obj : error LNK2019: 无法解析的外部符号 "__declspec(dllimport) public: void __thiscall QPrinter::setOutputFileName(class QString const &)" (__imp_?setOutputFileName@QPrinter@@QAEXABVQString@@@Z)，该符号在函数 "public: bool __thiscall QCustomPlot::savePdf(class QString const &,int,int,enum QCP::ExportPen,class QString const &,class QString const &)" (?savePdf@QCustomPlot@@QAE_NABVQString@@HHW4ExportPen@QCP@@00@Z) 中被引用
+qcustomplot.obj : error LNK2019: 无法解析的外部符号 "__declspec(dllimport) public: void __thiscall QPrinter::setColorMode(enum QPrinter::ColorMode)" (__imp_?setColorMode@QPrinter@@QAEXW4ColorMode@1@@Z)，该符号在函数 "public: bool __thiscall QCustomPlot::savePdf(class QString const &,int,int,enum QCP::ExportPen,class QString const &,class QString const &)" (?savePdf@QCustomPlot@@QAE_NABVQString@@HHW4ExportPen@QCP@@00@Z) 中被引用
+qcustomplot.obj : error LNK2019: 无法解析的外部符号 "__declspec(dllimport) public: class QPrintEngine * __thiscall QPrinter::printEngine(void)const " (__imp_?printEngine@QPrinter@@QBEPAVQPrintEngine@@XZ)，该符号在函数 "public: bool __thiscall QCustomPlot::savePdf(class QString const &,int,int,enum QCP::ExportPen,class QString const &,class QString const &)" (?savePdf@QCustomPlot@@QAE_NABVQString@@HHW4ExportPen@QCP@@00@Z) 中被引用
+D:\Qt_project\Lifter_client_mscv\Win32\Release\\testCHART.exe : fatal error LNK1120: 6 个无法解析的外部命令

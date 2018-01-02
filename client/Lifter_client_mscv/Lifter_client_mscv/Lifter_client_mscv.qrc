@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/qss">
+        <file>style.qss</file>
+        <file>test.qss</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file alias="rotate">Resources/805.gif</file>
+        <file alias="gray">Resources/gray.png</file>
+        <file alias="green">Resources/green.png</file>
+        <file alias="logo">Resources/logo.ico</file>
+        <file alias="red">Resources/red.png</file>
+    </qresource>
+</RCC>

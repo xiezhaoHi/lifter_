@@ -1,0 +1,88 @@
+QLabel#label_lxzy,#label_sdzzjkzt,#label_xwkg,#label_jxkg,#label_jtkg,#label_mls
+,#label_dqlskbzt,#label_gssjczk,#label_zyslbw,#label_yxzt{
+color:rgb(34,140,58);
+}
+QGraphicsView{
+  color: #BBBBBB;
+}
+
+
+QChartView{
+color:rgb(0,255,0);
+}
+/*  background-color: #222222;*/
+QStackedWidget, QLabel, QPushButton, QRadioButton, QCheckBox,
+QGroupBox, QStatusBar, QToolButton, QComboBox, QDialog {
+    background:#222222;
+    color: #BBBBBB;
+    font-family: "Segoe UI";
+}
+
+/* === QWidget ===  background: #222222;*/
+QWidget:window {
+    background:#222222;
+    color: #BBBBBB;
+    font-family: "Segoe UI";
+}
+
+/* === QToolTip === */
+QToolTip {
+    background-color: #000000;
+    border: 2px solid #333333;
+    color: yellow;
+}
+
+/* === QPushButton === */
+QPushButton {
+    border: 1px solid #333333;
+    padding: 4px;
+    min-width: 65px;
+    min-height: 12px;
+}
+
+QPushButton:hover {
+    background-color: #333333;
+    border-color: #444444;
+}
+
+QPushButton:pressed {
+    background-color: #111111;
+    border-color: #333333;
+    color: yellow;
+}
+
+QPushButton:disabled {
+    color: #333333;
+}
+
+/* === Checkable items === */
+QCheckBox::indicator, QRadioButton::indicator, QTreeView::indicator {
+    width: 16px;
+    height: 16px;
+    background-color: #111111;
+    border: 1px solid #333333;
+}
+
+QRadioButton::indicator {
+    border-radius: 8px;
+}
+
+QCheckBox::indicator::checked, QRadioButton::indicator::checked, QTreeView::indicator::checked {
+    background-color: qradialgradient(cx:0.5, cy:0.5, fx:0.25, fy:0.15, radius:0.3, stop:0 #BBBBBB, stop:1 #111111);
+}
+
+QCheckBox::indicator:disabled, QRadioButton::indicator:disabled, QTreeView::indicator:disabled {
+    background-color: #444444;
+}
+
+QCheckBox::indicator::checked:disabled, QRadioButton::indicator::checked:disabled, QTreeView::indicator::checked:disabled {
+    background-color: qradialgradient(cx:0.5, cy:0.5, fx:0.25, fy:0.15, radius:0.3, stop:0 #BBBBBB, stop:1 #444444);
+}
+
+/* === QComboBox === */
+QComboBox {
+    background-color: black;
+    border: 1px solid #333333;
+    color: white;
+    padding:1px 2em 1px 3px;
+}

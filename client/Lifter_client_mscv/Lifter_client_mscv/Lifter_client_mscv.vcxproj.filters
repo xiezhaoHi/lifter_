@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>moc;h;cpp</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{9f90bbcb-83ba-4f1a-beca-70baec8286dd}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{c0604936-3790-467b-847f-1c2de65495fa}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Source Files\config">
+      <UniqueIdentifier>{33ee1c1e-f955-4db6-aa2b-1c41f6b79611}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\custom">
+      <UniqueIdentifier>{4e563ace-387f-49d1-a4dc-bd23f81abca5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\database_service">
+      <UniqueIdentifier>{f5a4da2e-1b62-4f8e-9aed-9217b985b0d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\log">
+      <UniqueIdentifier>{700066be-c3ad-4d53-8ea0-00bd7b70c336}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\source">
+      <UniqueIdentifier>{d5d5a495-83a9-49fc-9cab-b6dc61b21c1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\singleAPP">
+      <UniqueIdentifier>{414041e9-efd0-4b4d-8794-7e36d4ae22a4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Lifter_client_mscv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_Lifter_client_mscv.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_Lifter_client_mscv.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_Lifter_client_mscv.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="config\config.cpp">
+      <Filter>Source Files\config</Filter>
+    </ClCompile>
+    <ClCompile Include="custom\custom.cpp">
+      <Filter>Source Files\custom</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_custom.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_custom.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="database_service\connectionpool.cpp">
+      <Filter>Source Files\database_service</Filter>
+    </ClCompile>
+    <ClCompile Include="database_service\database_service.cpp">
+      <Filter>Source Files\database_service</Filter>
+    </ClCompile>
+    <ClCompile Include="database_service\mydatabase.cpp">
+      <Filter>Source Files\database_service</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_mydatabase.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_mydatabase.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="log_\log_.cpp">
+      <Filter>Source Files\log</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_configdialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_configdialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_mylabel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_mylabel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_mylabel_add.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_mylabel_add.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="CCycleBuffer.cpp">
+      <Filter>Source Files\source</Filter>
+    </ClCompile>
+    <ClCompile Include="client_manager.cpp">
+      <Filter>Source Files\source</Filter>
+    </ClCompile>
+    <ClCompile Include="clientasio.cpp">
+      <Filter>Source Files\source</Filter>
+    </ClCompile>
+    <ClCompile Include="configdialog.cpp">
+      <Filter>Source Files\source</Filter>
+    </ClCompile>
+    <ClCompile Include="mylabel.cpp">
+      <Filter>Source Files\source</Filter>
+    </ClCompile>
+    <ClCompile Include="mylabel_add.cpp">
+      <Filter>Source Files\source</Filter>
+    </ClCompile>
+    <ClCompile Include="usebuffer.cpp">
+      <Filter>Source Files\source</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SingleApplication.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="SingleApplication.cpp">
+      <Filter>Source Files\singleAPP</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Lifter_client_mscv.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Lifter_client_mscv.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Lifter_client_mscv.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="custom\custom.h">
+      <Filter>Source Files\custom</Filter>
+    </CustomBuild>
+    <CustomBuild Include="database_service\mydatabase.h">
+      <Filter>Source Files\database_service</Filter>
+    </CustomBuild>
+    <CustomBuild Include="configdialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="custom.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="configdialog.h">
+      <Filter>Source Files\source</Filter>
+    </CustomBuild>
+    <CustomBuild Include="mylabel.h">
+      <Filter>Source Files\source</Filter>
+    </CustomBuild>
+    <CustomBuild Include="mylabel_add.h">
+      <Filter>Source Files\source</Filter>
+    </CustomBuild>
+    <CustomBuild Include="SingleApplication.h">
+      <Filter>Source Files\singleAPP</Filter>
+    </CustomBuild>
+    <CustomBuild Include="config\config.h">
+      <Filter>Source Files\config</Filter>
+    </CustomBuild>
+    <CustomBuild Include="database_service\connectionpool.h">
+      <Filter>Source Files\database_service</Filter>
+    </CustomBuild>
+    <CustomBuild Include="database_service\database_service.h">
+      <Filter>Source Files\database_service</Filter>
+    </CustomBuild>
+    <CustomBuild Include="log_\log_.h">
+      <Filter>Source Files\log</Filter>
+    </CustomBuild>
+    <CustomBuild Include="CCycleBuffer.h">
+      <Filter>Source Files\source</Filter>
+    </CustomBuild>
+    <CustomBuild Include="clientasio.h">
+      <Filter>Source Files\source</Filter>
+    </CustomBuild>
+    <CustomBuild Include="client_manager.h">
+      <Filter>Source Files\source</Filter>
+    </CustomBuild>
+    <CustomBuild Include="enum.h">
+      <Filter>Source Files\source</Filter>
+    </CustomBuild>
+    <CustomBuild Include="usebuffer.h">
+      <Filter>Source Files\source</Filter>
+    </CustomBuild>
+    <CustomBuild Include="resource.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="style.qss">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="test.qss">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\ui_configdialog.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\ui_custom.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\ui_Lifter_client_mscv.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Lifter_client_mscv.rc" />
+  </ItemGroup>
+</Project>

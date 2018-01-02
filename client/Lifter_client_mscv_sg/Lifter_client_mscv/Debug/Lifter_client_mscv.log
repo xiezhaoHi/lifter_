@@ -1,0 +1,8 @@
+﻿  Lifter_client_mscv.cpp
+  Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately. For example:
+  - add -D_WIN32_WINNT=0x0501 to the compiler command line; or
+  - add _WIN32_WINNT=0x0501 to your project's Preprocessor Definitions.
+  Assuming _WIN32_WINNT=0x0501 (i.e. Windows XP target).
+d:\qt_project\lifter\client\lifter_client_mscv_sg\lifter_client_mscv\custom/custom.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  Lifter_client_mscv.vcxproj -> D:\Qt_project\lifter\client\Lifter_client_mscv_sg\Win32\Debug\Lifter_client_mscv.exe
+  Lifter_client_mscv.vcxproj -> D:\Qt_project\lifter\client\Lifter_client_mscv_sg\Win32\Debug\Lifter_client_mscv.pdb (Full PDB)

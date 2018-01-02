@@ -1,0 +1,33 @@
+QLable{
+color:rgb(0,255,0);
+}
+QComboBox {
+    border: 1px solid gray;
+    border-radius: 3px;
+
+    min-width: 6em;   /*组合框的最小宽度*/
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+
+    border-left-width: 1px;
+    border-left-color: darkgray;
+    border-left-style: solid; /* just a single line */
+    border-top-right-radius: 3px; /* same radius as the QComboBox */
+    border-bottom-right-radius: 3px;
+}
+
+/*
+QPushButton{
+    border-image:url(:/images/1.png);
+    background-repeat:no-repeat;
+   border:none;
+}
+QPushButton:hover{
+    background-color:#CCCCCC
+}
+QPushButton:pressed{
+    background-color:#888888
+}*/

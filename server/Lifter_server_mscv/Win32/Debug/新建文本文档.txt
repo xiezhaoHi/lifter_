@@ -1,0 +1,5 @@
+sc create Lifter_test binPath= "D:\Qt_project\Lifter_server_mscv\Win32\Debug\Lifter_server_mscv.exe"
+
+sc start Lifter_test 
+
+pause

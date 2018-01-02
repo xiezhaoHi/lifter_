@@ -1,0 +1,44 @@
+﻿  Moc'ing testCHART.h...
+  Uic'ing testCHART.ui...
+  Moc'ing qcustomplot.h...
+  Rcc'ing testCHART.qrc...
+RCC : warning : No resources in 'D:\Qt_project\testCHART\testCHART.qrc'.
+  
+  moc_qcustomplot.cpp
+  moc_testCHART.cpp
+  main.cpp
+  qcustomplot.cpp
+D:\2015\VC\include\xutility(2372): warning C4996: 'std::copy::_Unchecked_iterators::_Deprecate': Call to 'std::copy' with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
+  D:\2015\VC\include\xutility(2372): note: 参见“std::copy::_Unchecked_iterators::_Deprecate”的声明
+  qcustomplot.cpp(20927): note: 参见对正在编译的函数 模板 实例化“_OutIt *std::copy<const QCPGraphData*,QCPGraphData*>(_InIt,_InIt,_OutIt)”的引用
+          with
+          [
+              _OutIt=QCPGraphData *,
+              _InIt=const QCPGraphData *
+          ]
+D:\2015\VC\include\xutility(2568): warning C4996: 'std::copy_backward::_Unchecked_iterators::_Deprecate': Call to 'std::copy_backward' with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
+  D:\2015\VC\include\xutility(2568): note: 参见“std::copy_backward::_Unchecked_iterators::_Deprecate”的声明
+  d:\qt_project\testchart\qcustomplot.h(3192): note: 参见对正在编译的函数 模板 实例化“_BidIt2 *std::copy_backward<QCPGraphData*,QCPGraphData*>(_BidIt1,_BidIt1,_BidIt2)”的引用
+          with
+          [
+              _BidIt2=QCPGraphData *,
+              _BidIt1=QCPGraphData *
+          ]
+  d:\qt_project\testchart\qcustomplot.h(3182): note: 编译类 模板 成员函数“void QCPDataContainer<QCPGraphData>::preallocateGrow(int)”时
+  d:\qt_project\testchart\qcustomplot.h(2741): note: 参见对正在编译的函数 模板 实例化“void QCPDataContainer<QCPGraphData>::preallocateGrow(int)”的引用
+  d:\qt_project\testchart\qcustomplot.h(2734): note: 编译类 模板 成员函数“void QCPDataContainer<QCPGraphData>::add(const DataType &)”时
+          with
+          [
+              DataType=QCPGraphData
+          ]
+  qcustomplot.cpp(20259): note: 参见对正在编译的函数 模板 实例化“void QCPDataContainer<QCPGraphData>::add(const DataType &)”的引用
+          with
+          [
+              DataType=QCPGraphData
+          ]
+  d:\qt_project\testchart\qcustomplot.h(5225): note: 参见对正在编译的类 模板 实例化“QCPDataContainer<QCPGraphData>”的引用
+  testCHART.cpp
+  正在生成代码...
+  qrc_testCHART.cpp
+  testCHART.vcxproj -> D:\Qt_project\Lifter_client_mscv\Win32\Debug\testCHART.exe
+  testCHART.vcxproj -> D:\Qt_project\Lifter_client_mscv\Win32\Debug\testCHART.pdb (Full PDB)
