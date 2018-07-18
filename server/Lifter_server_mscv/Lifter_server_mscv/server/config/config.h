@@ -46,12 +46,15 @@ public:
 
     /*
      * 返回指定电梯ID的设备ID map
+	 * strLifterID:电梯ID
+	 * flag:设备类型
      */
     QMap<int,QString>  GetDeviceIDListByLifterID(QString const& strLifterID, int flag);
 
 /*********************************************************************************/
     /*
      * 返回数据库 配置信息
+	 * flag:标识
      */
     QString GetDBConfigData(int flag);
 
@@ -129,17 +132,17 @@ public:
     /*
      *指定 继电器关联设备ID 返回 继电器IP
      */
-    QString GetDeviceIpByID(const QString &strClientIp, QString const& strID);
+    QString GetDeviceIpByID(const QString &, QString const& strID);
 
     /*
      * 指定关联设备id 返回 继电器的DI 口
      */
-    QString GetDIByDeviceID(QString const& strClientIp,QString const& strID);
+    QString GetDIByDeviceID(QString const& ,QString const& strID);
 
     /*
      * 指定关联设备的id 返回 继电器的DO口号
      */
-    QString GetDOByDeviceID(const QString &strClientIp, QString const& strID);
+    QString GetDOByDeviceID(const QString &, QString const& strID);
 /*********************************************************************************/
     /*
     *获取错误信息

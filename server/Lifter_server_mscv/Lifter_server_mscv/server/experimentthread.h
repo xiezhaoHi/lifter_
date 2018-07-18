@@ -14,7 +14,7 @@ typedef struct experiment_struct
 class ExperimentThread : public QThread
 {
 public:
-    ExperimentThread(QString const& strIp):m_strIp(strIp){}
+    ExperimentThread(QString const& lifterID):m_lifterID(lifterID){}
     void SetData(experimentData const& struct_Data)
     {
         m_data = struct_Data;
@@ -23,7 +23,7 @@ public:
 
     void run();
     experimentData m_data;
-    QString m_strIp;
+    QString m_lifterID;
 
 };
 

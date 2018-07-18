@@ -1,10 +1,16 @@
 #ifndef ENUM_H
 #define ENUM_H
 #include<QString>
+#if _MSC_VER >= 1600
+#pragma execution_character_set("utf-8")
+#endif
 //包含一些公共数据
 
 //测试
 #define _TEST_
+
+//用户服务(更用户client端和动画client交互数据)线程池数量
+#define	THREAD_POOL_NUM  1
 
 //客户端等待的最大超时时间
 #define SOCKET_WAIT_TIME  3000
@@ -69,7 +75,43 @@ enum device_data_len
 {
     device_cgq_data_len = 11, //传感器单条信息长度
     device_bmq_data_len = 8, //编码器数据帧长度
-    device_jdq_data_len = 9 //继电器数据帧长度
+    device_jdq_data_len = 9, //继电器数据帧长度
+	device_dydl_data_len =8 //电源 数据帧长度
+};
+
+#define MAX_LEN 64 //传感器中间缓冲区大小
+#define PACKAGE_SIZE 11 // 数据包长度
+#define  BMQBUFF_SIZE  22 //编码器buff size
+#define  BMQPACKAGE_ONESIZE   13 //编码器 03 指令反悔数据包大小为 13   方向 角度 转速
+#define  BMQPACKAGE_TWOSIZE  9 //编码器 04指令返回数据包大小为 9   计数值
+#define  BMQPACKAGE_SENDSIZE 8 //编码器 发送的指令长度
+
+//电源 电压 电流 
+//功能码
+#define DY_FUNCODE_03	0x03 //读保持寄存器,本指令读取从设备保持寄存器（4X）的二进制值
+#define DY_FUNCODE_06	0x06 //写单个寄存器。本指令将从设备的某个保持寄存器（4X）设置为指定值
+#define DY_FUNCODE_80	0x80 //异常功能码	功能码+80H
+
+//三相电
+enum DY_DATA_3
+{
+	DY_DATA3_A,
+	DY_DATA3_B,
+	DY_DATA3_C,
+	DY_DATA3_max,
+};
+enum DY_RES_INDEX
+{
+	DY_RES_0, //从机地址
+	DY_RES_1, //功能码
+};
+//电源返回数据的标识
+enum DY_DATA_FLAG
+{
+	DY_DATA_FLAG_RET = 1000, //写寄存器的返回数据
+	DY_DATA_FLAG_DY = 1003, //电压数据
+	DY_DATA_FLAG_DL = 1006, //电流数据
+	DY_DATA_FLAG_GL = 1012, //功率数据
 };
 
 /*用户标识*/
@@ -218,6 +260,7 @@ enum PCClientPkg
     PCClientPkg_Dhxz, //动画选择
     PCClientPkg_Config, //配置数据包
     PCClientPkg_CAN_CONTROL = 4006,
+	PCClientPkg_onlineStatus  //客户端在线状态 0 离线 1上线  2 心跳
 };
 
 /*

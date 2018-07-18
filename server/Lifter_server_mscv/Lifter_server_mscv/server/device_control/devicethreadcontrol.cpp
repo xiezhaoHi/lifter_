@@ -18,6 +18,16 @@ static char buffbmq_2[] ={(char)0x01 ,(char)0x04 ,(char)0x00  ,(char)0x40  ,(cha
 //继电器 获取当前 开关量
 static char buffjdq[] ={(char)0xCC ,(char)0xDD ,(char)0xC0  ,(char)0x01  ,(char)0x00  ,(char)0x00 ,(char)0x0D  ,(char)0xCE  ,(char)0x9c};
 
+/////电源
+//电压 ABC 3项的值
+static char buffDyDy[] = { (char)0x01 ,(char)0x03 ,(char)0x03 ,(char)0xEB ,(char)0x00 ,(char)0x03 ,(char)0x75 ,(char)0xBB };
+
+//电流 ABC 3项的值
+static char buffDyDl[] = { (char)0x01,(char)0x03 ,(char)0x03 ,(char)0xEE ,(char)0x00 ,(char)0x06 ,(char)0xA5 ,(char)0xB9 };
+
+//功率 ABC 3项的值
+static char buffDyGl[] = { (char)0x01 ,(char)0x03 ,(char)0x03 ,(char)0xF4 ,(char)0x00 ,(char)0x06 ,(char)0x84 ,(char)0x7E };
+
 DeviceThreadControl* DeviceThreadControl::m_singleton = NULL;
 DeviceThreadControl::DeviceThreadControl()
 {
@@ -43,7 +53,7 @@ DeviceThreadControl*& DeviceThreadControl::GetInstance()
 #define BMQ_THREAD
 
 //电流 电压 传感器设备
-//#define DLDY_THREAD
+#define DLDY_THREAD
 void    DeviceThreadControl::StartThreads()
 {
     /*
@@ -98,7 +108,7 @@ void    DeviceThreadControl::StartThreads()
 
 //电流 电压 传感器设备
 #ifdef DLDY_THREAD
-    QMap<QString,ip_port>const & ipPortMap_dydl = Config::GetInstance()->GetTypeDeviceMap(device_bmq);
+    QMap<QString,ip_port>const & ipPortMap_dydl = Config::GetInstance()->GetTypeDeviceMap(device_dydl);
     if(!ipPortMap_dydl.isEmpty())
     {
         QMap<QString,ip_port>::const_iterator  begin = ipPortMap_dydl.begin(),end = ipPortMap_dydl.end();
@@ -263,8 +273,6 @@ void JdqControlThread::run()
     SOCKADDR_IN clientaddr;
     char buf[1024];
 
-    WSADATA wsa;
-    WSAStartup(MAKEWORD(2,0),&wsa);	//初始化WS2_32.DLL
 
     while(m_stop)
     {
@@ -338,7 +346,7 @@ void JdqControlThread::run()
 
      }
     closesocket(clientsocket);
-    WSACleanup();
+    
 #endif
 }
 
@@ -488,10 +496,10 @@ bool   JdqControlThread::sendJdqData(SOCKET & clientsocket)
                    qDebug() << QString("继电器采集write错误") ;
                   return false;
                }
-			   QTime t1;
-			   t1.start();
+			  // QTime t1;
+			  // t1.start();
                 retlen = recv(clientsocket, buffRead, buffReadLen, 0);
-				qDebug() << QString("jdq1_%1").arg(t1.elapsed());
+				//qDebug() << QString("jdq1_%1").arg(t1.elapsed());
                if(retlen >0)
                {
 
@@ -517,10 +525,10 @@ bool   JdqControlThread::sendJdqData(SOCKET & clientsocket)
                   qDebug() << QString("继电器采集write错误") ;
                  return false;
               }
-			  QTime t1;
-			  t1.start();
+			  //QTime t1;
+			  //t1.start();
                 retlen = recv(clientsocket, buffRead, buffReadLen, 0);
-				qDebug() << QString("jdq2_%1").arg(t1.elapsed());
+				//qDebug() << QString("jdq2_%1").arg(t1.elapsed());
               if(retlen >0 )
               {
                   for(int index = 0;index < retlen; ++index)
@@ -606,13 +614,13 @@ bool   CgqControlThread::sendCgqData(tcp::socket& socket_)
 
      const int buffReadLen = 4096;
      char buffRead[buffReadLen] = {0};
-	 QTime t1;
-	 t1.start();
+	// QTime t1;
+	// t1.start();
 
      retlen = recv(clientsocket, buffRead, buffReadLen, 0);
 
 	 // setsockopt(clientsocket, IPPROTO_TCP, TCP_QUICKACK, (int[]) { 1 }, sizeof(int));
-	 qDebug() << QString("cgq2_%1").arg(t1.elapsed());
+	// qDebug() << QString("cgq2_%1").arg(t1.elapsed());
        if(retlen >0 )
        {
            //    QString str;
@@ -625,12 +633,12 @@ bool   CgqControlThread::sendCgqData(tcp::socket& socket_)
            //QString current_time = current_date_time.toString("hh:mm:ss.zzz ");
            //qDebug() << current_time;
 
-		   QTime t2;
-		   t2.start();
+		   //QTime t2;
+		   //t2.start();
            //处理 返回值
            BusinessSession::GetInstance()->InterfaceFun(
                      m_strIp,buffRead,retlen);
-		   qDebug() << QString("cgq4_%1").arg(t2.elapsed());
+		   //qDebug() << QString("cgq4_%1").arg(t2.elapsed());
        }
        else
        {
@@ -692,42 +700,6 @@ bool   CgqControlThread::ansy_sendCgqData(tcp::socket& socket_)
 void CgqControlThread::run()
 {
 
-// 	SOCKET socket1;
-// 	WSADATA wsaData;
-// 	if (WSAStartup(MAKEWORD(2, 1), &wsaData)) //调用Windows Sockets DLL
-// 	{
-// 		printf("Winsock无法初始化!\n");
-// 		WSACleanup();
-// 		return;
-// 	}
-// 	struct sockaddr_in server;
-// 	int len = sizeof(server);
-// 	server.sin_family = AF_INET;
-// 	server.sin_port = htons(33333); ///server的监听端口
-// 	server.sin_addr.s_addr = inet_addr("192.168.0.100"); ///server的地址
-// 	printf("connect the server...\n");
-// 	socket1 = socket(AF_INET, SOCK_DGRAM, 0);
-// 	while (1)
-// 	{
-// 		char buffer[1024] = "\0";
-// 		printf("input message\n");
-// 		scanf("%s", buffer);
-// 		if (strcmp(buffer, "bye") == 0)
-// 		{
-// 			printf("exit\n");
-// 			Sleep(100);
-// 			closesocket(socket1);
-// 			break;
-// 		}
-// 
-// 		if (sendto(socket1, buffer, sizeof(buffer), 0, (struct sockaddr*)&server, len) != SOCKET_ERROR)
-// 		{
-// 			Sleep(100);
-// 			if (recvfrom(socket1, buffer, sizeof(buffer), 0, (struct sockaddr*)&server, &len) != SOCKET_ERROR)
-// 				printf("echo from server:%s\n", buffer);
-// 		}
-// 	}
-// 	return;
 
 
 #ifdef TCP_ASIO
@@ -777,9 +749,7 @@ void CgqControlThread::run()
     SOCKADDR_IN clientaddr;
     char buf[1024];
 
-    WSADATA wsa;
-    WSAStartup(MAKEWORD(2,1),&wsa);	//初始化WS2_32.DLL
-
+ 
 
 	const int buffReadLen = 4096;
 	char buffRead[buffReadLen] = { 0 };
@@ -831,8 +801,8 @@ void CgqControlThread::run()
 
 			while (m_stop)
 			{
-				QTime t;
-				t.start();
+				//QTime t;
+				//t.start();
 				len = recvfrom(clientsocket, buffRead, sizeof(buffRead), 0
 					, (struct sockaddr*)&serveraddr, &len);
 				if (len == SOCKET_ERROR)
@@ -842,7 +812,7 @@ void CgqControlThread::run()
 				}
 				BusinessSession::GetInstance()->InterfaceFun(
 					m_strIp, buffRead, len);
-				qDebug() << QString("cgq_%1").arg(t.elapsed());
+				//qDebug() << QString("cgq_%1").arg(t.elapsed());
 			}
 		}
 		
@@ -912,7 +882,7 @@ void CgqControlThread::run()
 #endif
 	}
     closesocket(clientsocket);
-    WSACleanup();
+    
 #endif
 }
 
@@ -973,8 +943,6 @@ void BmqControlThread::run()
     SOCKADDR_IN serveraddr;
 
 
-    WSADATA wsa;
-    WSAStartup(MAKEWORD(2,0),&wsa);	//初始化WS2_32.DLL
 
     while(m_stop)
     {
@@ -1051,7 +1019,7 @@ void BmqControlThread::run()
 
      }
     closesocket(clientsocket);
-    WSACleanup();
+    
 #endif
 }
 void BmqControlThread::stop()
@@ -1138,10 +1106,10 @@ bool   BmqControlThread::sendBmqData(SOCKET &clientsocket )
 
    if(retlen == BMQPACKAGE_SENDSIZE)
    {
-	   QTime t1;
-	   t1.start();
+	  // QTime t1;
+	   //t1.start();
        retlen = recv(clientsocket, buffRead, buffReadLen, 0);
-	   qDebug() << QString("bmq_%1").arg(t1.elapsed());
+	   //qDebug() << QString("bmq_%1").arg(t1.elapsed());
        if(retlen == dataLen )
        {
           QString strRet = BusinessSession::GetInstance()->InterfaceFun(
@@ -1161,16 +1129,260 @@ bool   BmqControlThread::sendBmqData(SOCKET &clientsocket )
 
 DydlControlThread::DydlControlThread(QString strIp,int iPort)
 {
-
+	m_strIp = strIp;
+	m_iPort = iPort;
+	m_strID = Config::GetInstance()->GetDeviceID(m_strIp);
 }
 
 
 void DydlControlThread::run()
 {
 
+	SOCKET clientsocket;
+	SOCKADDR_IN serveraddr;
+	SOCKADDR_IN clientaddr;
+	char buf[1024];
+
+
+	while (m_stop)
+	{
+
+		while (m_stop)
+		{
+			//创建套接字
+			if ((clientsocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) <= 0)
+			{
+				qDebug() << QString("套接字socket创建失败!");
+				msleep(300);
+				continue;
+			}
+			break;
+		}
+
+		serveraddr.sin_family = AF_INET;
+		serveraddr.sin_port = htons(m_iPort);
+		serveraddr.sin_addr.S_un.S_addr = inet_addr(m_strIp.toStdString().c_str());
+		int error = -1;
+		int len = sizeof(int);
+		timeval tm;
+		fd_set set;
+		unsigned long ul = 1;
+		ioctlsocket(clientsocket, FIONBIO, &ul); //设置为非阻塞模式
+		bool ret = false;
+		if (::connect(clientsocket, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) == -1)
+		{
+			tm.tv_sec = 3;
+			tm.tv_usec = 0;
+			FD_ZERO(&set);
+			FD_SET(clientsocket, &set);
+			if (select(clientsocket + 1, NULL, &set, NULL, &tm) > 0)
+			{
+				getsockopt(clientsocket, SOL_SOCKET, SO_ERROR, (char *)&error, /*(socklen_t *)*/&len);
+				if (error == 0)
+					ret = true;
+				else
+					ret = false;
+			}
+			else
+				ret = false;
+		}
+		else
+			ret = true;
+		ul = 0;
+		ioctlsocket(clientsocket, FIONBIO, &ul); //设置为阻塞模式
+		if (!ret)
+		{
+			closesocket(clientsocket);
+			qDebug() << QString("电压电流_ip=%1连接失败!_%2").arg(m_strIp).arg(GetLastError());
+			msleep(3000);
+			continue;
+
+		}
+
+		int nNetTimeout = SOCKET_WAIT_TIME; //1秒
+											//发送时限
+		setsockopt(clientsocket, SOL_SOCKET, SO_SNDTIMEO, (char *)&nNetTimeout, sizeof(int));
+		//接收时限
+		setsockopt(clientsocket, SOL_SOCKET, SO_RCVTIMEO, (char *)&nNetTimeout, sizeof(int));
+		while (m_stop)
+		{
+			if (!sendDydlData(clientsocket))
+			{
+				closesocket(clientsocket);
+				break;
+			}
+
+		}
+
+	}
+	closesocket(clientsocket);
+
 }
 
 void DydlControlThread::stop()
 {
+	m_stop = false;
+}
 
+bool   DydlControlThread::sendDydlData(SOCKET & clientsocket)
+{
+	int retlen = -1;
+	SendData msg;
+	const int buffReadLen = 4096;
+	char buffRead[buffReadLen] = { 0 };
+	QString str;
+	boost::system::error_code ec;
+	//  qDebug() << QThread::currentThreadId();
+
+
+	/*指令 队列中有 指令 优先处理
+	*
+	* 处理后 再 发送状态 指令获取当期的状态
+	*
+	*/
+	if (!UserBuffer::GetInstance()->IsEmptySendList(m_strID) && !m_strID.isEmpty())
+	{
+		SendData& data = UserBuffer::GetInstance()->FrontSendList(m_strID);
+
+		retlen = send(clientsocket, data.buff, data.len, 0);
+
+		if (retlen == data.len)
+			UserBuffer::GetInstance()->PopFrontSendList(m_strID);
+		else
+		{
+			qDebug() << QString("电源设备write错误");
+			return false;
+		}
+		retlen = recv(clientsocket, buffRead, buffReadLen, 0);
+	
+		if (retlen >0)
+		{
+
+			BusinessSession::GetInstance()->InterfaceFun(
+				m_strIp, buffRead, retlen, DY_DATA_FLAG_RET);
+		}
+		else
+		{
+			qDebug() << QString("电源设备采集read错误");
+			return false;
+		}
+
+	}
+
+	::Sleep(50);
+
+	//电源 电压 3项
+	{
+
+		memcpy(msg.buff, buffDyDy, device_dydl_data_len);
+		msg.len = device_dydl_data_len;
+		retlen = send(clientsocket, msg.buff, msg.len, 0);
+
+		if (retlen != msg.len)
+		{
+			qDebug() << QString("电源采集write错误");
+			return false;
+		}
+
+		retlen = recv(clientsocket, buffRead, buffReadLen, 0);
+
+		if (retlen > 0)
+		{
+			for (int index = 0; index < retlen; ++index)
+				str += QString("%1").arg(buffRead[index] & 0xFF, 2, 16, QLatin1Char('0'));
+
+			str = "";
+
+			QDateTime current_date_time = QDateTime::currentDateTime();
+			QString current_time = current_date_time.toString("hh:mm:ss.zzz ");
+			//qDebug() << current_time;
+
+			//处理 返回值
+			BusinessSession::GetInstance()->InterfaceFun(
+				m_strIp, buffRead, retlen, DY_DATA_FLAG_DY);
+		}
+		else
+		{
+			qDebug() << QString("继电器采集read错误");
+			return false;
+		}
+
+	}
+	
+	//电源 电流 3项
+	{
+		memcpy(msg.buff, buffDyDl, device_dydl_data_len);
+		msg.len = device_dydl_data_len;
+		retlen = send(clientsocket, msg.buff, msg.len, 0);
+
+		if (retlen != msg.len)
+		{
+			qDebug() << QString("电源采集write错误");
+			return false;
+		}
+
+		retlen = recv(clientsocket, buffRead, buffReadLen, 0);
+
+		if (retlen > 0)
+		{
+			for (int index = 0; index < retlen; ++index)
+				str += QString("%1").arg(buffRead[index] & 0xFF, 2, 16, QLatin1Char('0'));
+
+			str = "";
+
+			QDateTime current_date_time = QDateTime::currentDateTime();
+			QString current_time = current_date_time.toString("hh:mm:ss.zzz ");
+			//qDebug() << current_time;
+
+			//处理 返回值
+			BusinessSession::GetInstance()->InterfaceFun(
+				m_strIp, buffRead, retlen, DY_DATA_FLAG_DL);
+		}
+		else
+		{
+			qDebug() << QString("继电器采集read错误");
+			return false;
+		}
+	}
+	
+	//电源  功率 3项
+	{
+		memcpy(msg.buff, buffDyGl, device_dydl_data_len);
+		msg.len = device_dydl_data_len;
+		retlen = send(clientsocket, msg.buff, msg.len, 0);
+
+		if (retlen != msg.len)
+		{
+			qDebug() << QString("电源采集write错误");
+			return false;
+		}
+
+		retlen = recv(clientsocket, buffRead, buffReadLen, 0);
+
+		if (retlen > 0)
+		{
+			for (int index = 0; index < retlen; ++index)
+				str += QString("%1").arg(buffRead[index] & 0xFF, 2, 16, QLatin1Char('0'));
+
+			str = "";
+
+			QDateTime current_date_time = QDateTime::currentDateTime();
+			QString current_time = current_date_time.toString("hh:mm:ss.zzz ");
+			//qDebug() << current_time;
+
+			//处理 返回值
+			BusinessSession::GetInstance()->InterfaceFun(
+				m_strIp, buffRead, retlen,DY_DATA_FLAG_GL);
+		}
+		else
+		{
+			qDebug() << QString("电源采集read错误");
+			return false;
+		}
+	}
+
+
+	return true;
+
+	
 }

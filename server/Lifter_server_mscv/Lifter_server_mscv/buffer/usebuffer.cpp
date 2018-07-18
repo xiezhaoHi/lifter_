@@ -29,6 +29,7 @@ UserBuffer* UserBuffer::GetInstance(void)
             m_singleton->m_strTableName[device_cgq] = QString("sensor_");
             m_singleton->m_strTableName[device_jdq] = QString("relay_");
             m_singleton->m_strTableName[device_bmq] = QString("encoder_");
+			m_singleton->m_strTableName[device_dydl] = QString("power_");
             m_singleton->m_strDBName = QString("Lifter_");
             QDateTime current_date_time = QDateTime::currentDateTime();
         //    QString strDate = current_date_time.toString("yyyy/MM/dd");
@@ -47,6 +48,9 @@ UserBuffer* UserBuffer::GetInstance(void)
             //Bmq模块
             m_singleton->InitDBSqlBuff(device_bmq,m_singleton->m_strDBName+current_date_time.toString(QString("yyyyMM"))
                           ,m_singleton->m_strTableName[device_bmq]+current_date_time.toString(QString("yyyyMM")));
+			//电源模块
+			m_singleton->InitDBSqlBuff(device_dydl, m_singleton->m_strDBName + current_date_time.toString(QString("yyyyMM"))
+				, m_singleton->m_strTableName[device_dydl] + current_date_time.toString(QString("yyyyMM")));
 
             QString strDBName = Config::GetInstance()->GetDBConfigData(database_dbName);
             strDBName = strDBName.isEmpty()?"data":strDBName;
@@ -158,6 +162,20 @@ void    UserBuffer::InitDBSqlBuff(int flag,QString const& strDBName,QString cons
 
 
                 break;
+	case device_dydl:
+		/*
+		* 电源 设备 数据 sql模板
+		*/
+		m_strDefSql[device_dydl] = QString("INSERT INTO `%1`.`%2`\
+                                                  (`power_id`,\
+													`power_date`,\
+													`power_time`,\
+													`power_data_a`,\
+													`power_data_b`,\
+													`power_data_c`)VALUES").arg(strDBName).arg(strTableName);
+
+
+		break;
     default:
         break;
     }
@@ -505,9 +523,9 @@ device_buf_T UserBuffer::PopCanDeviceQueue()
 /*
  * 动画选择 记录 选择的 电梯ID
  */
-void    UserBuffer::WriteDhxzBuffer(QString const& strIp)
+void    UserBuffer::WriteDhxzBuffer(QString const& strLifterID)
 {
-    m_dhxz_id = strIp;
+    m_dhxz_id = strLifterID;
 }
 
 QString UserBuffer::ReadDhxzBuffer()

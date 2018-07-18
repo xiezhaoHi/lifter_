@@ -141,6 +141,7 @@ public:
     void run();
 
     void stop();
+	bool   sendDydlData(SOCKET & clientsocket);
 
 private:
     /*
@@ -148,7 +149,8 @@ private:
      */
     QString m_strIp;
     int m_iPort;
-volatile  bool    m_stop;
+	QString m_strID;//设备标识
+	volatile  bool    m_stop;
 
 };
 

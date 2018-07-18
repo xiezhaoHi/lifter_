@@ -68,9 +68,9 @@ public:
 
     /**************************************************/
     /*
-     * 动画选择 记录 选择的 ip
+     * 动画选择 记录 选择的 电梯ID
      */
-    void    WriteDhxzBuffer(QString const& strIp);
+    void    WriteDhxzBuffer(QString const& );
     QString ReadDhxzBuffer();
 
 

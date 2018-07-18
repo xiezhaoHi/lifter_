@@ -1,6 +1,7 @@
 ﻿#include "session.h"
 #include"buffer/usebuffer.h"
 #include<QDateTime>
+
 Mysession::Mysession(boost::asio::io_service& io_service,Connections& con)
     : socket_(io_service)
     ,m_connections(con)
@@ -82,20 +83,35 @@ void Mysession::handle_read(const boost::system::error_code& error, size_t bytes
          */
         else if(m_connections.m_client_map.contains(getsessionIp()))
 #else
-        if(m_connections.m_client_map.contains(getsessionIp()))
+        //if(m_connections.m_client_map.contains(getsessionIp()))
 #endif
         {
 
             //解析从客户端发来的 数据包
             int packgCount = 0;
-            if(BusinessSession::GetInstance()->DealClientPackg(QString(data_),getsessionIp()))
+			
+			int ret = BusinessSession::GetInstance()->DealClientPackg(QString(data_)
+				, getsessionIp(),m_lifterID,m_clientID);
+			memset(data_, 0, MAX_PACKET_LEN);
+			//客户端登陆数据包
+            if(1 == ret)
             {
-
-                qDebug() << "正确处理pc客户端数据包!";
+				if (NULL == m_sendSessionThread)
+				{
+					m_sendIp = getsessionIp();
+					m_sendSessionThread = new SendThread();
+					m_sendSessionThread->m_session = this;
+					m_sendSessionThread->start();
+				}
+               //客户端上线
             }
-            else
+            else if(ret == 2)
             {
-                qDebug() << "错误处理pc客户端数据包!";
+                //客户端下线
+				if (NULL != m_sendSessionThread)
+				{
+					m_sendSessionThread->stop();
+				}
             }
         }
 
@@ -189,13 +205,7 @@ void Mysession::handle_read(const boost::system::error_code& error, size_t bytes
 
 
 #endif
-      if(NULL == m_sendSessionThread)
-      {
-          m_sendIp = getsessionIp();
-		  m_sendSessionThread = new SendThread();
-		  m_sendSessionThread->m_session = this;
-		  m_sendSessionThread->start();
-      }
+
 
       socket_.async_read_some(boost::asio::buffer(data_, MAX_PACKET_LEN),
           strand_.wrap(boost::bind(&Mysession::handle_read, shared_from_this(),
@@ -227,7 +237,7 @@ void Mysession::handle_write(const boost::system::error_code& error)
 
 bool Mysession::sendNewestData()
 {
-
+	//返回响应数据
     QString strRet = UserBuffer::GetInstance()->PopResponseQueue(m_sendIp);
     if(!strRet.isEmpty())
     {
@@ -241,8 +251,9 @@ bool Mysession::sendNewestData()
          return false;
         }
     }
-    QString strBelongs = Config::GetInstance()->GetLifterIDByClientIp(m_sendIp);
+    QString strBelongs = m_lifterID;
     QStringList list;
+	//返回设备采集数据
     //sc双笼 对应 两套设备 后期 优化,暂时没想到好设计
     if(strBelongs.left(4) == "0003")
     {

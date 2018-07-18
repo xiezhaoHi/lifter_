@@ -162,6 +162,22 @@ public:
     //动画显示客户端
     bool sendNewestDhData();
 
+	/*
+	获取会话的 ID 或者关联的电梯ID
+	flag 0 客户端ID  1关联电梯ID
+	*/
+	QString  getsessionID(int flag = 0)
+	{
+		if (0 == flag)
+		{
+			return m_clientID;
+		}
+		if (1 == flag)
+		{
+			return m_lifterID;
+		}
+	}
+
     boost::mutex    mutex_msg;
     QList<Msg> write_msgs_; //发送队列
 private:
@@ -169,10 +185,10 @@ private:
     bool    m_stop_flag; //结束标志
 
     tcp::socket socket_;
-      Connections&  m_connections;
-       boost::asio::io_service::strand strand_;
-         deadline_timer timer_;
-          bool                    is_read_;
+    Connections&  m_connections;
+    boost::asio::io_service::strand strand_;
+    deadline_timer timer_;
+    bool                    is_read_;
 
     char data_[MAX_PACKET_LEN];
     int recv_times;
@@ -186,8 +202,11 @@ private:
     int     m_sendCount;//重发次数
 
     //继电器
-        char jdq_buff[MAX_PACKET_LEN];
+    char jdq_buff[MAX_PACKET_LEN];
 
+	//会话 关联的电梯ID 和 客户端ID
+	QString m_lifterID; 
+	QString m_clientID;
 };
 /*
  * 分发数据到客户端的线程
@@ -205,7 +224,7 @@ public:
     void run()
     {
 		if(m_session != NULL)
-			m_client_ID =  Config::GetInstance()->GetClientIDByIp(m_session->getsessionIp());
+			m_client_ID =  m_session->getsessionID();
         while(m_stop)
         {
             if(m_session != NULL)

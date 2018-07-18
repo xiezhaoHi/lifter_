@@ -6,15 +6,18 @@
 #include"buffer/canmodulebuffer.h"
 #include"experimentthread.h"
 #include<QMap>
-#define MAX_LEN 64 //传感器中间缓冲区大小
-#define PACKAGE_SIZE 11 // 数据包长度
-#define  BMQBUFF_SIZE  22 //编码器buff size
-#define  BMQPACKAGE_ONESIZE   13 //编码器 03 指令反悔数据包大小为 13   方向 角度 转速
-#define  BMQPACKAGE_TWOSIZE  9 //编码器 04指令返回数据包大小为 9   计数值
-#define  BMQPACKAGE_SENDSIZE 8 //编码器 发送的指令长度
+
 /*
 业务处理类
 */
+//客户端发来的继电器命令 数据
+typedef struct JDQ_DEAL_DATA 
+{
+		QString  m_strBelongs	; //所属电梯
+		QString  m_strID		; //设备DO值
+		QString  m_strRec		; //设置开关值 0 或者 1
+		int		 m_openFlag; //点动 或者一直保持
+}JDQ_DEAL_DATA;
 
 class BusinessSession
 {
@@ -26,13 +29,18 @@ public:
      * 处理客户端 发送来的控制数据包 返回相应的设备ip 和 命令
      *data len 为 客户端 发来的 数据 和数据长度
      * strIp 和 buff len 是 返回的数据设备ip 和命令 命令长度
+	 * 返回 0 通用,解析数据完成
+	 * 返回 -1 通用,解析错误哦
+	 * 返回 1, 显示客户端 登陆
+	 * lifterID 返回 客户端关联的电梯ID  
+	 * clientID 返回 客户端ID
      */
-    bool DealClientPackg(QString strData, const QString &strClientIp);
+    int DealClientPackg(QString strData, QString const& ,QString & ,QString &);
 
     /*
      * 获取继电器指令
      */
-    bool GetJdqControlOrder(const QString &strClientIp, const QString &strID, const QString &strRec, QString &strDeviceIp, char *buff, int &len, int packCount = 1);
+    bool GetJdqControlOrder(JDQ_DEAL_DATA &, QString &, char *buff, int &len, int packCount = 1);
 
 /**********************************************************/
     /*
@@ -44,7 +52,7 @@ public:
     /*
      * 开始执行实验线程
      */
-    void StartExperimentThread(QString const& strClientIp,experimentData const& strData);
+    void StartExperimentThread(QString const& ,experimentData const& strData);
 
   /**********************************************************************/
     /*
@@ -80,9 +88,14 @@ public:
      * data 设备采集的数据缓存指针
      * len 设备采集数据的长度
      *
+	 *20180620 修改:增加一个flag标志,标识数据的类型
      *
 */
-    QString InterfaceFun(QString strIp,char* data, int len);
+
+    QString InterfaceFun(QString strIp,char* data, int len,  int flag=-1);
+
+
+
 
     /*m_bmqFirst*/
     bool  getBmqFirst(QString const& strIp);
@@ -128,6 +141,14 @@ public:
     //继电器
   QString DealJdqQuit(QString const& strIp);
 
+	/************************************************************************/
+	/*
+	* 电源 电压 电流 功率 数据解析
+	* 20180620 修改: 新增 flag 标识 数据的类型
+	*/
+  QString DealDydlData(QString strIp, char* data, int len, int flag);
+
+  QString DealDydlQuit(QString const& strIp);
     /**********************************************************************/
     /*
      * 通用 获取各个设备 Userbuffer对象指针
@@ -152,6 +173,10 @@ public:
     QString GetLastError();
 
 private:
+	
+	//大小端标识 true 为大端(低地址存 高字节数据)
+	bool m_bigFlag;
+
        /*
         * 实现线程
         */

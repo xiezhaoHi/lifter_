@@ -481,11 +481,10 @@ QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
   *指定 继电器关联设备ID 返回 继电器IP
   * strID 为继电器ID加 DI DO 关联的设备ID
   */
- QString Config::GetDeviceIpByID(QString const& strClientIp,const QString &strID)
+ QString Config::GetDeviceIpByID(QString const& lifterBelongs,const QString &strID)
  {
-     if(!m_clientMap_ipMap.contains(strClientIp))
-         return "";
-     QString strBelongs = m_clientMap_ipMap[strClientIp]->at(client_config_belongs); //所属电梯
+
+     QString strBelongs = lifterBelongs; //所属电梯
      QString strDeviceId;
       QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_devcice_ipMap.constBegin();
       for(; it != m_devcice_ipMap.constEnd(); ++it)
@@ -505,12 +504,12 @@ QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
  /*
   * 指定关联设备id 返回 继电器的DI 口
   * trID 为继电器ID加 DI DO 关联的设备ID
+  * strBelongsID 客户端 所属电梯ID
   */
- QString Config::GetDIByDeviceID(QString const& strClientIp,QString const& strID)
+ QString Config::GetDIByDeviceID(QString const& strBelongsID,QString const& strID)
  {
-     if(!m_clientMap_ipMap.contains(strClientIp))
-         return "";
-     QString strBelongs = m_clientMap_ipMap[strClientIp]->at(client_config_belongs); //所属电梯
+
+     QString strBelongs = strBelongsID; //所属电梯
      QString strDeviceId;
       QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_devcice_ipMap.constBegin();
       for(; it != m_devcice_ipMap.constEnd(); ++it)
@@ -530,16 +529,15 @@ QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
  /*
   * 指定关联设备的id 返回 继电器的DO口号
   * strID 为继电器ID+ DI DO 关联的设备ID
-  * strClientIp 客户端ip 获取到设备ID
+  * strBelongsID 客户端 所属电梯ID
   *
   */
 // QMap<QString,boost::shared_ptr<QStringList>> m_devcice_ipMap; //设备ip 映射 设备list
 //         QMap<QString,boost::shared_ptr<QStringList>> m_clientMap_ipMap; //client ip 映射list
- QString Config::GetDOByDeviceID(QString const& strClientIp,QString const& strID)
+ QString Config::GetDOByDeviceID(QString const& strBelongsID,QString const& strID)
  {
-    if(!m_clientMap_ipMap.contains(strClientIp))
-        return "";
-    QString strBelongs = m_clientMap_ipMap[strClientIp]->at(client_config_belongs); //所属电梯
+   
+    QString strBelongs = strBelongsID; //所属电梯
     QString strDeviceId;
      QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_devcice_ipMap.constBegin();
      for(; it != m_devcice_ipMap.constEnd(); ++it)

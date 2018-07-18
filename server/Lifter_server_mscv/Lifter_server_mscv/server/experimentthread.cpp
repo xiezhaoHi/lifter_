@@ -27,7 +27,14 @@ void ExperimentThread::run()
     QString deviceIp;
     int len = 0;
     char buff[10] = {0};
-    BusinessSession::GetInstance()->GetJdqControlOrder(m_strIp,lifterFload[m_data.m_begin],QString("1"),deviceIp,buff,len);
+
+	JDQ_DEAL_DATA dealData;
+	dealData.m_strBelongs = m_lifterID;
+	dealData.m_strID = lifterFload[m_data.m_begin];
+	dealData.m_strRec = QString("1");
+	dealData.m_openFlag = 0;
+
+    BusinessSession::GetInstance()->GetJdqControlOrder(dealData,deviceIp,buff,len);
     SendData msg;
     memcpy(msg.buff,buff,len);
     msg.len = len;

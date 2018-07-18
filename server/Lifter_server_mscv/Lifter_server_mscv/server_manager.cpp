@@ -26,7 +26,12 @@ server_manager::server_manager()
 
 bool server_manager::start_server()
 {
+
     /*初始化*/
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2, 0), &wsa);	//初始化WS2_32.DLL
+
+
 
     //1.初始化日志
     if(!Log_::GetInstance()->Init_log(qApp->applicationDirPath()))
@@ -68,7 +73,9 @@ bool server_manager::start_server()
 
      //4.采集服务
      qDebug() << "采集服务开启!";
-	 Myserver::getInstance(Config::GetInstance()->GetServicePort(),5);
+	 //4.1 专门处理用户消息
+	 Myserver::getInstance(Config::GetInstance()->GetServicePort(), THREAD_POOL_NUM);
+	 //采集设备服务
 	 Myserver::getInstance()->run_server();
      m_start_flag = true;
      return true;
@@ -102,6 +109,9 @@ void server_manager::stop_server()
      */
     MyDatabase::GetInstance()->Destroy();
 	qDebug() << QString("结束服务!");
+
+	//卸载网络库
+	WSACleanup();
 }
 
 
