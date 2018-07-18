@@ -811,8 +811,9 @@ bool Lifter_client_mscv::eventFilter(QObject *watched, QEvent *event)
 				{
 					continue;
 				}
-				//已开的开关->关闭，重置
-				if (begin_left.value()->m_flag)
+				//已开的开关->关闭，重置 (除却 急停开关)
+				if (begin_left.value()->m_flag 
+					&& mapTempID[begin_left.key()]!=JDQ_DO_flag_jiT)
 				{
 					pTemp_left->setText(begin_left.value()->m_strName);
 					//复位开关状态
