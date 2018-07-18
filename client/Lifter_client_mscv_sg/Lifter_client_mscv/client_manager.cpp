@@ -6,10 +6,14 @@
 #include"database_service/mydatabase.h"
 #include<QSettings>
 #include<QStringList>
+
+
  client_manager* client_manager::m_singleton = NULL;
+
 client_manager::client_manager()
 {
     m_client = new ClientServer();
+	m_clientMsg = nullptr;
 }
  client_manager* client_manager::GetInstance(void)
  {
@@ -20,7 +24,19 @@ client_manager::client_manager()
 
 void client_manager::start_server()
 {
-      m_client->start();
+	//1.启动网络服务
+		m_client->start();
+
+	//2.客户端消息线程
+		QString strPath = qApp->applicationDirPath() + "\\config\\config.ini";
+		QSettings iniRead(strPath, QSettings::IniFormat);
+		QString strLifterID = iniRead.value("lifter/lifter_choose").toString();
+		QString strClientID = iniRead.value("client/client_id").toString();
+		m_clientMsg = new clientMsgInform(strLifterID, strClientID);
+		m_clientMsg->start();
+
+
+	//3.日志服务启动
         if(!Log_::GetInstance()->Init_log())
         {
            // QMessageBox m(QIcon(":/images/G:/测试图片/Entypo_26c8(0).ico"),QString("日志初始化错误"),QString("提示"));
@@ -59,13 +75,14 @@ void client_manager::start_server()
 
 void client_manager::stop_server()
 {
-    //1.断开连接
+	//1.客户端断开消息 发送
+	m_clientMsg->stop();
+	m_clientMsg->wait();
 
+    //2.断开连接
     m_client->stop();
     m_client->wait();
     delete m_client;
-
-
 }
 
 /*
@@ -86,13 +103,22 @@ bool client_manager::send_to_server(QString const& strType,QStringList const& st
 
     }
 
-	if (nullptr != m_client->m_client_con)
+	if (m_client->m_client_con)
 	{
 		m_client->m_client_con->PostSend(strSend.toStdString());
 	}
 	else
 		return false;
     return true;
+}
+
+/*获取客户端是否连接上服务端*/
+bool  client_manager::get_online_status()
+{
+	if (m_clientMsg)
+	{
+		return m_clientMsg->m_online;
+	}
 }
 
 void ClientServer::run()
@@ -115,3 +141,48 @@ void ClientServer::run()
          ::Sleep(1000);
     }
 }
+
+
+ void clientMsgInform::run()
+{
+	 QString strSend;
+	 QStringList sendList;
+	 while (m_stop)
+	 {
+		 //上线
+		
+		 if (!m_online) //离线
+		 {
+			 strSend = QString("<lifterID>%1</lifterID><clientID>%2</clientID><msg>%3</msg>")
+				 .arg(m_lifterID).arg(m_clientID).arg(client_online);
+			 sendList.clear();
+			 sendList.append(strSend);
+			 if (client_manager::GetInstance()->send_to_server(CLIENTMSG, sendList))
+			 {
+				 m_online = true;
+			 }
+		 }
+		 else //在线 发送心跳
+		 {
+			 strSend = QString("<lifterID>%1</lifterID><clientID>%2</clientID><msg>%3</msg>")
+				 .arg(m_lifterID).arg(m_clientID).arg(client_heartbeat);
+			 sendList.clear();
+			 sendList.append(strSend);
+			 if (!client_manager::GetInstance()->send_to_server(CLIENTMSG, sendList)) //发送失败 离线
+			 {
+				 m_online = false;
+			 }
+		 }
+		 Sleep(3000);
+	 }
+	 strSend = QString("<lifterID>%1</lifterID><clientID>%2</clientID><msg>%3</msg>")
+		 .arg(m_lifterID).arg(m_clientID).arg(client_offline);
+	 sendList.clear();
+	 sendList.append(strSend);
+	 client_manager::GetInstance()->send_to_server(CLIENTMSG, sendList);
+}
+
+ void clientMsgInform::stop()
+ {
+	 m_stop = false;
+ }

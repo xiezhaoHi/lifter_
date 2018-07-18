@@ -3,6 +3,16 @@
 #include<QString>
 //包含一些公共数据
 
+//发送到 服务器 成功 与 否 
+enum SEND_FLAG
+{
+	SEND_FLAG_ERROR = -1,
+	SEND_FLAG_FAIL,//失败
+	SEND_FLAG_SUCESS,
+	SEND_FLAG_NOCHANGE,
+};
+
+
 //标识 编号 类型 位数
 #define  USER_ID_COUNT 4
 
@@ -40,7 +50,7 @@ enum device_name_config
     device_cgq = 1000, //传感器设备
     device_bmq = 1001, //编码器
     device_jdq , //继电器
-    device_max = 3
+    device_max =3
 };
 /*设备对应的数据帧长度*/
 enum device_data_len
@@ -158,7 +168,8 @@ enum client_config
 #define  LIFTER_TYPE_YLS "0001" //曳引式简易升降机
 #define  LIFTER_TYPE_QZS "0002" //强制式简易升降机
 #define  LIFTER_TYPE_SCSL "0003" //sc双笼施工升降机
-
+#define  LIFTER_SC_ID_A "00030001" //sc双笼 A		(面对电梯 左手)
+#define  LIFTER_SC_ID_B "00030002" //sc双笼 B		(面对电梯 右手)
 /*
  * 定义等待 时间
  */
@@ -168,5 +179,55 @@ enum client_config
  *自定义测试 步骤 或者 使用固定测试步骤  选择起点 和 终点
  */
 //#define ZDY_TASK
+//客户端通知消息
+//"<msg>0</msg>"
+#define  CLIENTMSG "4007" 
+enum client_msg
+{
+	client_offline = 0,//下线
+	client_online,  //上线
+	client_heartbeat,  //心跳消息
+	client_msg_max
+};
+
+
+/*
+开关状态
+*/
+enum JDQ_DO_flag
+{
+	//关 开
+	JDQ_DO_flag_close = 0,
+	JDQ_DO_flag_open = 1
+};
+
+/*
+打开开关是 常开 还是 打开一段时间就关闭(点动)
+*/
+enum JDQ_DO_open_flag
+{
+	JDQ_DO_open_all_yes, //长时间 保持
+	JDQ_DO_open_all_no  //点动
+};
+
+/*
+继电器 开关 设置标志
+*/
+#define  JDQ_DO_set_flag  "4001"
+
+/*
+对于继电器开关的定义标志
+*/
+
+#define JDQ_DO_flag_shangX		"20020007"	//上行
+#define JDQ_DO_flag_xiaX		"20020008"	//下行
+#define JDQ_DO_flag_jiT			"20020012"	//急停
+#define JDQ_DO_flag_fuW			"20020013"	//故障报警 / 复位
+#define JDQ_DO_flag_qiD			"20020014"	//电铃 / 启动
+#define JDQ_DO_flag_shouBST		"20020015"	//手柄上提(动作许可)
+#define JDQ_DO_flag_renLSB		"20020016"	//人脸识别
+#define JDQ_DO_flag_yaoS		"20020017"	//钥匙
+#define JDQ_DO_flag_jiaS		"20020018"	//加速
+
 
 #endif // ENUM_H

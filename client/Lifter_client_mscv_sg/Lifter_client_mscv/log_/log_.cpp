@@ -24,7 +24,7 @@ void OutputMessage(QtMsgType type, const QMessageLogContext &context, const QStr
     switch(type)
     {
     case QtDebugMsg:
-        text = QString("debug");
+        text = QStringLiteral("");
         break;
 
     case QtWarningMsg:

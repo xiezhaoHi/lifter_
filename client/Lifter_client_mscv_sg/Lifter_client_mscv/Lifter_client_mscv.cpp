@@ -22,6 +22,8 @@
 #include"configdialog.h" //配置窗口类
 
 #include<QStatusBar>
+#include<QMutex>
+
 #if _MSC_VER >= 1600
 #pragma execution_character_set("utf-8")
 
@@ -68,6 +70,8 @@ Lifter_client_mscv::Lifter_client_mscv(QWidget *parent)
 
 	//先实现一个效果 后期再优化  已优化
 	connect(&m_changeState_timer, &QTimer::timeout, this, &Lifter_client_mscv::ChangeButtonState);
+	//客户端是否与服务器连接  在线状态
+	connect(&m_onlineStatus_timer, &QTimer::timeout, this, &Lifter_client_mscv::ShowOnlineStatus);
 
 	/*****************************************************/
 	
@@ -119,12 +123,13 @@ Lifter_client_mscv::Lifter_client_mscv(QWidget *parent)
 	qRegisterMetaType<QMap<QString, int> >("QMap<QString, int>");
 
 
-	ShowWorker* worker = new ShowWorker();
+	ShowWorker* worker = new ShowWorker(this);
 	bool ret = connect(worker, &ShowWorker::showCgqData, this, &Lifter_client_mscv::show_ui_CgqData);
 	 connect(worker, &ShowWorker::showJdqData, this, &Lifter_client_mscv::show_ui_JdqData);
 	 connect(worker, &ShowWorker::showBmpData, this, &Lifter_client_mscv::show_ui_BmpData);
 	 connect(worker, &ShowWorker::showYlData, this, &Lifter_client_mscv::show_ui_YlData);
 	 connect(worker, &ShowWorker::showControlRes, this, &Lifter_client_mscv::show_ui_ControlRes);
+	 connect(worker, &ShowWorker::showdyData, this, &Lifter_client_mscv::show_ui_dyData);
 	 
 	worker->moveToThread(&m_thread_pool[0]);
 	connect(&m_thread_pool[0], &QThread::finished, worker, &QObject::deleteLater);
@@ -148,6 +153,10 @@ Lifter_client_mscv::Lifter_client_mscv(QWidget *parent)
 	* 开始 禁用 结束投放 菜单
 	*/
 	//ui->action_3->setDisabled(true);
+	//显示在线状态
+	m_baseTitle = windowTitle();
+	m_onlineStatus_timer.start(3000);
+
 }
 
 
@@ -248,45 +257,7 @@ void Lifter_client_mscv::on_pushButton_sz_clicked(bool checked)
 /*初始化图表 电压 电流*/
 void Lifter_client_mscv::init(void)
 {
-	//    QMap<QString,QLabel*> m_button_ID_to_ctl; //DI设备ID 映射 按钮
-	//    QMap<QString,QLabel*> m_label_ID_to_aqcd; //DI设备DI映射 安全触点
 
-	/*电压电流频率*/
-
-
-
-	/*图表显示*/
-	QLineSeries *series = new QLineSeries();
-
-	series->append(0, 6);
-	series->append(2, 4);
-	series->append(3, 8);
-	series->append(7, 4);
-	series->append(10, 5);
-	*series << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3) << QPointF(20, 2);
-
-
-	for (float index = 0; index < 10; index += 0.5)
-	{
-		series->append(index, qSin(index));
-	}
-	QChart *chart = new QChart();
-	chart->legend()->hide();
-	chart->addSeries(series);
-	chart->createDefaultAxes();
-	chart->setTitle("Simple line chart example");
-
-	ui->graphicsView_charts->setChart(chart);
-
-	/*说明*/
-	//电压说明
-	ui->label_dy_sm->setText("分辨力0.1v、精度0.2%rdg+0.2%FS");
-
-	//电流说明
-	ui->label_dl_sm->setText("分辨力0.1A/1A，精度0.3%rdg+0.3%FS");
-
-	//频率说明
-	ui->label_pl_sm->setText("分辨力0.1Hz、精度0.05%");
 }
 
 //传感器 加速度 水平度
@@ -406,7 +377,7 @@ void ShowWorker::analyseAllData()
 	while (UserBuffer::GetInstance()->ReturnClientServerQueueSize()>0)
 	{
 		QString strData = UserBuffer::GetInstance()->PopClientServerQueue();
-		// qDebug() << strData;
+		
 		QString error;
 		int row = 0, column = 0;
 		QString strDir; //编码器方向
@@ -434,6 +405,9 @@ void ShowWorker::analyseAllData()
 		QMap<int, QLabel*> *map_bmq = nullptr; /*编码器 数据类型 对应 控件*/;
 		QStandardItemModel* pModel = nullptr;
 		
+		/*电源电压电流显示数据*/
+		QLabel*** pppLabelDydlShow = nullptr;
+		
 		if ("1" == strBelongs.right(1)) //表示 笼A
 		{
 			map_id = &(m_pMainwindow->m_button_ID_to_ctl_left);
@@ -441,6 +415,7 @@ void ShowWorker::analyseAllData()
 			map_cgq = &(m_pMainwindow->m_cgq_to_label_left); 
 			map_bmq = &(m_pMainwindow->m_bmq_to_label_left);
 			pModel = m_pMainwindow->m_yl_tableV_mode_left;
+			pppLabelDydlShow = (QLabel***)m_pMainwindow->m_label_dydl_show_left;
 		}
 		if ("2" == strBelongs.right(1))//表示 笼B
 		{
@@ -449,6 +424,7 @@ void ShowWorker::analyseAllData()
 			map_cgq = &(m_pMainwindow->m_cgq_to_label_right);
 			map_bmq = &(m_pMainwindow->m_bmq_to_label_right);
 			pModel = m_pMainwindow->m_yl_tableV_mode_right;
+			pppLabelDydlShow = (QLabel***)m_pMainwindow->m_label_dydl_show_right;
 		}
 		QString strRootID = root.attribute(QString("type")); //找类型
 		rootFist = root;
@@ -567,6 +543,51 @@ void ShowWorker::analyseAllData()
 
 			}
 
+			//新增电源 数据显示
+			if (QString("1005") == strRootID)
+			{
+				root = rootFist.firstChildElement(QString("state")); //状态标识
+				if (!root.isNull())
+				{
+					QString strStatus =root.text();
+					//正常
+					if ("0" == strStatus)
+					{
+						root = rootFist.firstChildElement(QString("dataFlag")); //状态标识
+						if (!root.isNull())
+						{
+							int  dataIndex = root.text().toInt(); //数组位置标识  电压 、电流、频率
+							QString strDataA, strDataB, strDataC; //3相a b c
+							
+							root = rootFist.firstChildElement(QString("data_a")); //状态标识
+							if (!root.isNull())
+							{
+								strDataA = root.text();
+							}
+							root = rootFist.firstChildElement(QString("data_b")); //状态标识
+							if (!root.isNull())
+							{
+								strDataB = root.text();
+							}
+							root = rootFist.firstChildElement(QString("data_c")); //状态标识
+							if (!root.isNull())
+							{
+								strDataC = root.text();
+							}
+							//数据有效
+							if (dataIndex != -1 && dataIndex > DYDATA_SHOW_DY && dataIndex<DYDATA_SHOW_max)
+							{
+								emit showdyData(dataIndex, strDataA, strDataB, strDataC, pppLabelDydlShow);
+							}
+							
+						}
+					}
+					else //异常
+					{
+
+					}
+				}
+			}
 		}
 		else //表示 退出
 		{
@@ -610,7 +631,7 @@ void  Lifter_client_mscv::InitButtonIDMap(void)
 {
 
 }
-int i = 0;
+
 /*
 * 处理所有按钮点击事件
 *
@@ -620,39 +641,314 @@ bool Lifter_client_mscv::eventFilter(QObject *watched, QEvent *event)
 	//按钮下压
 	if (event->type() == QEvent::MouseButtonPress)
 	{
-
-		
+	
 	}
 	
 
 	//按钮释放
 	if (event->type() == QEvent::MouseButtonRelease)
 	{
+		unsigned int openFlag = JDQ_DO_open_all_yes; //打开开关 是 一直 保持还是 过会儿关闭(点动)
 		QStringList strSend;
 		QString strID, strLifter;
+		QMap<QPushButton*, QString> mapTempID; //中间map变量  控件关联的ID
+		QMap<QPushButton*, BtAttribute*> mapTempAttri; //中间map变量 属性
 		if (m_button_ID_left.contains((QPushButton*)watched))
 		{
-			strID = m_button_ID_left[(QPushButton*)watched];
-			strLifter = "0001";
+			mapTempID = m_button_ID_left;
+			strLifter = LIFTER_SC_ID_A;
+			mapTempAttri = m_BtAttribute_left;
 		}
 		else if (m_button_ID_right.contains((QPushButton*)watched))
 		{
-			 strID = m_button_ID_right[(QPushButton*)watched];
-			 strLifter = "0002";
+			mapTempID = m_button_ID_right;
+			strLifter = LIFTER_SC_ID_B;
+			mapTempAttri = m_BtAttribute_right;
 		}
 		else
 			return QMainWindow::eventFilter(watched, event);
-		if (m_choose_lifter.isEmpty())
+
+		/*操作逻辑说明:
+		1.
+			2:向下
+			3:向上
+			4:操作杆 向上提起
+
+			正常操作时:4 3 or 1 、1 or 3 4、4 2 or 1、 1 or 2 4
+		2.
+		正常操作前提:
+			钥匙 常开
+			人脸识别  常开
+			启动  常开
+		
+		3.
+		急停后 - 关闭急停  就恢复正常使用
+
+		4.
+		软件 结束时:
+			需要 关闭所有的开关
+		
+		*/
+
+		//0.获取按钮ID  
+		strID = mapTempID[(QPushButton*)watched];
+		BtAttribute*& pTempAttri = mapTempAttri[(QPushButton*)watched];
+
+		//中间变量获取失败
+		if (strID.isEmpty() || pTempAttri == nullptr )
 		{
-			m_choose_lifter = "0003";
+			//statusBar()->showMessage("控制错误,软件异常!"); // 显示临时信息，时间3秒钟.
+			qDebug() << "非控制操作!";
+			return QMainWindow::eventFilter(watched, event);
 		}
-		strSend.append(QString("<dev ID = '%1'>%2</dev><lifter>%3</lifter>")
-			.arg(strID).arg(i).arg(QString("%1%2").arg(m_choose_lifter.left(4))
-				.arg(strLifter)));
-		bool retB = client_manager::GetInstance()->send_to_server(QString("4001"), strSend);
-		i = 1 - i;
+		
+		/*1.判断ID 
+		1.1 为 上 下  按钮时 需要有前置 条件 (人脸识别、钥匙、启动)需要打开
+		1.2 为 加速 时, 需要 相应的前置 上 下 按钮 打开
+		*/
+
+		 //提示信息
+		BOOL  bFlag = TRUE; //操作成功与否 默认成功
+		QString strShowLog;
+		//1.1 
+		if (strID == JDQ_DO_flag_shangX || strID == JDQ_DO_flag_xiaX)
+		{
+			//1.1.1 人脸识别 、钥匙、启动 开关
+			QPushButton* pBtRenLSB = pTempAttri->m_bt_renLSB;
+			QPushButton* pBtYaoS = pTempAttri->m_bt_yaoS;
+			QPushButton* pBtQiD = pTempAttri->m_bt_qiD;
+			BtAttribute* pAttriRenLSB = mapTempAttri[pBtRenLSB];
+			BtAttribute* pAttriYaoS = mapTempAttri[pBtYaoS];
+			BtAttribute* pAttriQiD = mapTempAttri[pBtQiD];
+			//1.1.2数据有效
+			if (pBtRenLSB != nullptr && pAttriRenLSB != nullptr
+				&& pBtRenLSB != nullptr && pAttriYaoS != nullptr
+				&& pBtRenLSB != nullptr && pAttriQiD != nullptr)
+			{
+				//1.1.2.1满足上、下 行的前置 开关要求
+				if (pAttriRenLSB->m_flag && pAttriYaoS->m_flag && pAttriQiD->m_flag)
+				{
+					strShowLog = "上、下 前置开关 已打开,操作正常!";
+				}
+				else if(pTempAttri->m_flag) //先关闭了 前置条件
+				{
+					strShowLog = "上、下 前置开关 已打开,操作正常!";
+				}
+				else
+				{
+					strShowLog = "上、下 没有打开前置开关(人脸识别、钥匙、启动)!";
+					bFlag = FALSE;
+				}
+
+			}
+			else //1.1.3数据有误
+			{
+				strShowLog = "上、下 时获取关联开关变量错误!";
+				bFlag = FALSE;
+			}
+		}
+		//1.2
+		if (strID == JDQ_DO_flag_jiaS)
+		{
+			//1.2.1 获取关联的 上、下 按钮
+			QPushButton* pBtDir = pTempAttri->m_bt_dir;
+			BtAttribute* pAttriDir = mapTempAttri[pBtDir];
+			//1.2.1.1 数据有效
+			if (pBtDir != nullptr && pAttriDir != nullptr)
+			{
+				//1.2.1.1.1 上、下 开关 已打开
+				if (pAttriDir->m_flag)
+				{
+					strShowLog = "加速 前置开关 已打开,操作正常!";
+				}
+				else if(pTempAttri->m_flag) //前置条件 关闭
+				{
+					strShowLog = "加速 前置开关 已打开,操作正常!";
+				}
+				else
+				{
+					strShowLog = "加速 前置开关 未打开,操作失败!";
+					bFlag = FALSE;
+				}
+			}
+			else //1.2.1.2 数据无效
+			{
+				strShowLog = "加速 时获取关联开关变量错误!";
+				bFlag = FALSE;
+			}
+		}
+		
+		//1.3 显示状态消息
+		if (bFlag) //前置开关 成功
+		{
+			qDebug() << strShowLog;
+			statusBar()->showMessage(strShowLog, 3000); // 显示临时信息，时间3秒钟.
+		}
+		else //错误
+		{
+			qDebug() << strShowLog;
+			statusBar()->showMessage(strShowLog); 
+			return QMainWindow::eventFilter(watched, event);
+		}
+
+		//2  控制继电器 开关
+
+		//2.1 控件属性 标识 开关 状态 true(开) flase(关)
+		bool attriFlag = pTempAttri->m_flag;
+		//复位开关是点动的(因为 点动致使 所有的开关都关闭了,包括 急停 开关,但是急停
+		//开关 权限 应该是最大的.所以 发 开、关 状态模拟 点动)
+		if (strID == JDQ_DO_flag_fuW)
+		{
+			
+			QMap<QPushButton*, BtAttribute*>::iterator begin_left = mapTempAttri.begin()
+				, end_left = mapTempAttri.end();
+			QPushButton* pTemp_left = nullptr;
+			for (; begin_left != end_left; ++begin_left)
+			{
+				pTemp_left = nullptr;
+				pTemp_left = begin_left.key();
+				if (nullptr == pTemp_left)
+				{
+					continue;
+				}
+				//已开的开关->关闭，重置
+				if (begin_left.value()->m_flag)
+				{
+					pTemp_left->setText(begin_left.value()->m_strName);
+					//复位开关状态
+					begin_left.value()->m_flag = false;
+					strSend.append(QString("<dev ID = '%1'>%2</dev><lifter>%3</lifter><openFlag>%4</openFlag>")
+						.arg(mapTempID[begin_left.key()])
+						.arg(JDQ_DO_flag_close)
+						.arg(strLifter)
+						.arg(openFlag)
+					);
+				}
+				
+			}
+			strSend.append(QString("<dev ID = '%1'>%2</dev><lifter>%3</lifter><openFlag>%4</openFlag>")
+				.arg(strID)
+				.arg(JDQ_DO_flag_open)
+				.arg(strLifter)
+				.arg(openFlag)
+			);
+
+			attriFlag = true;
+		}
+
+		int sendFlag = attriFlag ? JDQ_DO_flag_close : JDQ_DO_flag_open; // 已开的 发送关 已关的 发送 开
+		
+		//2.2上、下 控制时,同时控制 手提杆 上提 操作
+		if (strID == JDQ_DO_flag_shangX || strID == JDQ_DO_flag_xiaX)
+		{
+			 //2.2.1 上、下 开关 互斥
+			if (pTempAttri->m_bt_dir != nullptr)
+			{
+				BtAttribute* pTempA =  mapTempAttri[pTempAttri->m_bt_dir];
+				if (pTempA != nullptr && pTempA->m_flag)//互斥开关 已打开,故 不能操作
+				{
+					statusBar()->showMessage("上、下 控制互斥,操作无效!", 3000);
+					return QMainWindow::eventFilter(watched, event);
+				}
+			}
+			//手提杆 开关
+			strSend.append(QString("<dev ID = '%1'>%2</dev><lifter>%3</lifter><openFlag>%4</openFlag>")
+				.arg(JDQ_DO_flag_shouBST)
+				.arg(sendFlag)
+				.arg(strLifter)
+				.arg(openFlag));
+
+			//上、下 关闭开关时,关闭 加速 开关
+			if (!sendFlag)
+			{
+				//加速控制 开关
+				strSend.append(QString("<dev ID = '%1'>%2</dev><lifter>%3</lifter><openFlag>%4</openFlag>")
+					.arg(JDQ_DO_flag_jiaS)
+					.arg(sendFlag)
+					.arg(strLifter)
+					.arg(openFlag));
+			}
+			
+		}
+		strSend.append(QString("<dev ID = '%1'>%2</dev><lifter>%3</lifter><openFlag>%4</openFlag>")
+			.arg(strID)
+			.arg(sendFlag)
+			.arg(strLifter)
+			.arg(openFlag)
+		);
+		bool retB = client_manager::GetInstance()->send_to_server(JDQ_DO_set_flag, strSend);
+		
 		if (retB)
-			statusBar()->showMessage("发送控制命令成功,等待回复!", 3000); // 显示临时信息，时间3秒钟.
+		{
+			statusBar()->showMessage("发送控制命令成功!", 3000); // 显示临时信息，时间3秒钟.
+															  //开
+// 			QTime dieTime = QTime::currentTime().addMSecs(WAIT_FOR_TIME);
+// 			int response = SEND_FLAG_NOCHANGE;
+// 			while (QTime::currentTime() < dieTime)
+// 			{
+// 				response = UserBuffer::GetInstance()->PopServerResponse();
+// 				if (SEND_FLAG_ERROR == response)
+// 					QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+// 				else
+// 					break;
+// 			}
+// 			QString text("请重试!");
+// 			if (SEND_FLAG_FAIL == response)
+// 				text = "设置失败";
+// 			else if (SEND_FLAG_SUCESS == response)
+			{
+				if (openFlag == JDQ_DO_open_all_yes)
+				{
+					if (pTempAttri->m_flag)
+					{
+						((QPushButton*)watched)->setText(pTempAttri->m_strName);
+						pTempAttri->m_flag = false;
+					}
+					else//关
+					{
+						((QPushButton*)watched)->setText(pTempAttri->m_strName + "(开)");
+						pTempAttri->m_flag = true;
+					}
+				}
+
+				//复位操作  重置所有开关 显示状态
+				if (strID == JDQ_DO_flag_fuW)
+				{
+					QMap<QPushButton*, BtAttribute*>::iterator begin_left = mapTempAttri.begin()
+						, end_left = mapTempAttri.end();
+					QPushButton* pTemp_left = nullptr;
+					for (; begin_left != end_left; ++begin_left)
+					{
+						pTemp_left = nullptr;
+						pTemp_left = begin_left.key();
+						if (nullptr == pTemp_left)
+						{
+							continue;
+						}
+						pTemp_left->setText(begin_left.value()->m_strName);
+						//复位开关状态
+						begin_left.value()->m_flag = false;
+					}
+				}
+
+				//上、下 关闭时 关闭相关的 加速按钮
+				if (strID == JDQ_DO_flag_shangX || strID == JDQ_DO_flag_xiaX)
+				{
+					BtAttribute* pTempA = mapTempAttri[pTempAttri->m_bt_jiaS];
+					if (!pTempAttri->m_flag)
+					{
+						pTempAttri->m_bt_jiaS->setText(pTempA->m_strName);
+						pTempA->m_flag = false;
+					}
+				}
+				//text = "设置成功";
+			}
+// 			else
+// 				text = "设置超时";
+// 			statusBar()->showMessage(text, 3000);
+			
+			
+		}
 		else
 			statusBar()->showMessage("发送控制命令失败,网络错误!", 3000); // 显示临时信息，时间3秒钟.
 
@@ -661,6 +957,9 @@ bool Lifter_client_mscv::eventFilter(QObject *watched, QEvent *event)
 	//双击 选择按钮时 取消 选择
 	if (event->type() == QEvent::MouseButtonDblClick)
 	{
+		//暂时 取消 这样的操作
+		return QMainWindow::eventFilter(watched, event);
+		/*
 		QStringList strSend;
 		QString strID, strLifter;
 		if (m_button_ID_left.contains((QPushButton*)watched))
@@ -683,8 +982,8 @@ bool Lifter_client_mscv::eventFilter(QObject *watched, QEvent *event)
 		strSend.append(QString("<dev ID = '%1'>%2</dev><lifter>%3</lifter>").arg(strID).arg(0)
 			.arg(QString("%1%2").arg(m_choose_lifter.left(4))
 			.arg(strLifter)));
-		client_manager::GetInstance()->send_to_server(QString("4001"), strSend);
-
+		client_manager::GetInstance()->send_to_server(JDQ_DO_set_flag, strSend);
+		*/
 	}
 
 	return QMainWindow::eventFilter(watched, event);
@@ -701,6 +1000,21 @@ void Lifter_client_mscv::ChangeButtonState()
 	}
 }
 
+/*
+* 与服务器的连接状态
+*/
+void Lifter_client_mscv::ShowOnlineStatus()
+{
+	bool onlineStatus = client_manager::GetInstance()->get_online_status();
+	QString curTitle;
+	if (onlineStatus) //在线
+	{
+		curTitle += m_baseTitle + "-在线";
+	}
+	else
+		curTitle += m_baseTitle + "-离线";
+	setWindowTitle(curTitle);
+}
 void Lifter_client_mscv::on_action_triggered()
 {
 	ConfigDialog dlg(gSizeR, gSizeP);
@@ -795,26 +1109,26 @@ void Lifter_client_mscv::on_action_2_triggered()
 	client_manager::GetInstance()->send_to_server(QString("4003"), strSendList);
 
 	QTime dieTime = QTime::currentTime().addMSecs(WAIT_FOR_TIME);
-	int response = 2;
+	int response = SEND_FLAG_NOCHANGE;
 	while (QTime::currentTime() < dieTime)
 	{
 		response = UserBuffer::GetInstance()->PopServerResponse();
-		if (-1 == response)
+		if (SEND_FLAG_ERROR == response)
 			QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 		else
 			break;
 	}
 	QString text("请重试!");
-	if (0 == response)
+	if (SEND_FLAG_FAIL == response)
 		text = "设置失败";
-	else if (1 == response)
+	else if (SEND_FLAG_SUCESS == response)
 		text = "设置成功";
 	else
 		text = "设置超时";
 	QMessageBox message(QMessageBox::Warning, "提示", text, QMessageBox::Ok, NULL);
 	message.exec();
 
-	if (1 == response)
+	if (SEND_FLAG_SUCESS == response)
 		ui->action_3->setDisabled(false);
 	else
 		ui->action_2->setDisabled(false);
@@ -830,25 +1144,25 @@ void Lifter_client_mscv::on_action_3_triggered()
 	client_manager::GetInstance()->send_to_server(QString("4003"), strSendList);
 
 	QTime dieTime = QTime::currentTime().addMSecs(WAIT_FOR_TIME);
-	int response = 2;
+	int response = SEND_FLAG_NOCHANGE;
 	while (QTime::currentTime() < dieTime)
 	{
 		response = UserBuffer::GetInstance()->PopServerResponse();
-		if (-1 == response)
+		if (SEND_FLAG_ERROR == response)
 			QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 		else
 			break;
 	}
 	QString text("请重试!");
-	if (0 == response)
+	if (SEND_FLAG_FAIL == response)
 		text = "设置失败";
-	else if (1 == response)
+	else if (SEND_FLAG_SUCESS == response)
 		text = "设置成功";
 	else
 		text = "设置超时";
 	QMessageBox message(QMessageBox::Warning, "提示", text, QMessageBox::Ok, NULL);
 	message.exec();
-	if (1 == response)
+	if (SEND_FLAG_SUCESS == response)
 		ui->action_2->setDisabled(false);
 	else
 		ui->action_3->setDisabled(false);
@@ -866,24 +1180,24 @@ void Lifter_client_mscv::on_action_CAN_triggered()
 	client_manager::GetInstance()->send_to_server(QString("4006"), strSendList);
 
 	QTime dieTime = QTime::currentTime().addMSecs(WAIT_FOR_TIME);
-	int response = 2;
+	int response = SEND_FLAG_NOCHANGE;
 	while (QTime::currentTime() < dieTime)
 	{
 		response = UserBuffer::GetInstance()->PopServerResponse();
-		if (-1 == response)
+		if (SEND_FLAG_ERROR == response)
 			QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 		else
 			break;
 	}
-	if (1 != response)
+	if (SEND_FLAG_SUCESS != response)
 	{
 		QString strTest;
 
-		if (0 == response)
+		if (SEND_FLAG_FAIL == response)
 		{
 			strTest = "启动配置失败";
 		}
-		if (-1 == response)
+		if (SEND_FLAG_ERROR == response)
 		{
 			strTest = "启动配置超时,服务端未启动!";
 		}
@@ -907,11 +1221,11 @@ void Lifter_client_mscv::on_action_CAN_triggered()
 	client_manager::GetInstance()->send_to_server(QString("4006"), strSendList);
 
 	dieTime = QTime::currentTime().addMSecs(WAIT_FOR_TIME);
-	response = 2;
+	response = SEND_FLAG_NOCHANGE;
 	while (QTime::currentTime() < dieTime)
 	{
 		response = UserBuffer::GetInstance()->PopServerResponse();
-		if (-1 == response)
+		if (SEND_FLAG_ERROR == response)
 			QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 		else
 			break;
@@ -932,7 +1246,157 @@ void    Lifter_client_mscv::show_ui_ControlRes(int ret)
 	}
 }
 
+//电源 数据 显示
+void Lifter_client_mscv::show_ui_dyData(int dataIndex, QString & strDataA, QString& strDataB, QString& strDataC,QLabel*** pppLabelDydlShow)
+{
+	if (pppLabelDydlShow[dataIndex][DYDATA_DYDLPL_A])
+	{
+		pppLabelDydlShow[dataIndex][DYDATA_DYDLPL_A]->setText(strDataA);
+	}
+	if (pppLabelDydlShow[dataIndex][DYDATA_DYDLPL_B])
+	{
+		pppLabelDydlShow[dataIndex][DYDATA_DYDLPL_B]->setText(strDataB);
+	}
+	if (pppLabelDydlShow[dataIndex][DYDATA_DYDLPL_C])
+	{
+		pppLabelDydlShow[dataIndex][DYDATA_DYDLPL_C]->setText(strDataC);
+	}
+	
+}
 
+//电源 设置 电压 电流 频率
+
+void Lifter_client_mscv::on_pushButton_dySet_right(bool flag)
+{
+	m_pButtonSet_right_set->setEnabled(false);
+	
+	QString strLifterID = LIFTER_SC_ID_B;
+
+	//电压
+	int dataDy = m_edit_dydl_set_right[DYDATA_SHOW_DY]->text().toInt();
+	//电流
+	int dataDl = m_edit_dydl_set_right[DYDATA_SHOW_DL]->text().toInt();
+	//频率
+	int dataPl = m_edit_dydl_set_right[DYDATA_SHOW_PL]->text().toInt();
+
+
+	QStringList strSendList;
+	if (dataDy > 0)
+	{
+		QString str = QString("<lifter>%1</lifter><dataFlag>%2</dataFlag ><data>%3</data>")
+			.arg(strLifterID).arg(DYDATA_SHOW_DY).arg(dataDy);
+		strSendList << str;
+	}
+	if (dataDl > 0)
+	{
+		QString str = QString("<lifter>%1</lifter><dataFlag>%2</dataFlag ><data>%3</data>")
+			.arg(strLifterID).arg(DYDATA_SHOW_DL).arg(dataDl);
+		strSendList << str;
+	}
+	if (dataPl > 0)
+	{
+		QString str = QString("<lifter>%1</lifter><dataFlag>%2</dataFlag ><data>%3</data>")
+			.arg(strLifterID).arg(DYDATA_SHOW_PL).arg(dataPl);
+		strSendList << str;
+	}
+	if (strSendList.isEmpty())
+	{
+		QMessageBox message(QMessageBox::Warning, "提示", "请输入有效数据,重试!", QMessageBox::Ok, NULL);
+		message.exec();
+		m_pButtonSet_right_set->setEnabled(true);
+		return;
+	}
+	
+
+	client_manager::GetInstance()->send_to_server(QString("4008"), strSendList);
+
+	QTime dieTime = QTime::currentTime().addMSecs(WAIT_FOR_TIME);
+	int response = SEND_FLAG_NOCHANGE;
+	while (QTime::currentTime() < dieTime)
+	{
+		response = UserBuffer::GetInstance()->PopServerResponse();
+		if (SEND_FLAG_ERROR == response)
+			QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+		else
+			break;
+	}
+	QString text("请重试!");
+	if (SEND_FLAG_FAIL == response)
+		text = "设置失败";
+	else if (SEND_FLAG_SUCESS == response)
+		text = "设置成功";
+	else
+		text = "设置超时";
+	QMessageBox message(QMessageBox::Warning, "提示", text, QMessageBox::Ok, NULL);
+	message.exec();
+	m_pButtonSet_right_set->setEnabled(true);
+}
+void Lifter_client_mscv::on_pushButton_dySet_left(bool flag)
+{
+	//禁用
+	m_pButtonSet_left_set->setEnabled(false);
+
+	QString strLifterID = LIFTER_SC_ID_A;
+
+	//电压
+	int dataDy = m_edit_dydl_set_left[DYDATA_SHOW_DY]->text().toInt();
+	//电流
+	int dataDl = m_edit_dydl_set_left[DYDATA_SHOW_DL]->text().toInt();
+	//频率
+	int dataPl = m_edit_dydl_set_left[DYDATA_SHOW_PL]->text().toInt();
+
+
+	QStringList strSendList;
+	if (dataDy > 0)
+	{
+		QString str = QString("<lifter>%1</lifter><dataFlag>%2</dataFlag ><data>%3</data>")
+			.arg(strLifterID).arg(DYDATA_SHOW_DY).arg(dataDy);
+		strSendList << str;
+	}
+	if (dataDl > 0)
+	{
+		QString str = QString("<lifter>%1</lifter><dataFlag>%2</dataFlag ><data>%3</data>")
+			.arg(strLifterID).arg(DYDATA_SHOW_DL).arg(dataDl);
+		strSendList << str;
+	}
+	if (dataPl > 0)
+	{
+		QString str = QString("<lifter>%1</lifter><dataFlag>%2</dataFlag ><data>%3</data>")
+			.arg(strLifterID).arg(DYDATA_SHOW_PL).arg(dataPl);
+		strSendList << str;
+	}
+	if (strSendList.isEmpty())
+	{
+		QMessageBox message(QMessageBox::Warning, "提示", "请输入有效数据,重试!", QMessageBox::Ok, NULL);
+		message.exec();
+		m_pButtonSet_right_set->setEnabled(true);
+		return;
+	}
+
+
+	client_manager::GetInstance()->send_to_server(QString("4008"), strSendList);
+
+	QTime dieTime = QTime::currentTime().addMSecs(WAIT_FOR_TIME);
+	int response = SEND_FLAG_NOCHANGE;
+	while (QTime::currentTime() < dieTime)
+	{
+		response = UserBuffer::GetInstance()->PopServerResponse();
+		if (SEND_FLAG_ERROR == response)
+			QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+		else
+			break;
+	}
+	QString text("请重试!");
+	if (SEND_FLAG_FAIL == response)
+		text = "设置失败";
+	else if (SEND_FLAG_SUCESS == response)
+		text = "设置成功";
+	else
+		text = "设置超时";
+	QMessageBox message(QMessageBox::Warning, "提示", text, QMessageBox::Ok, NULL);
+	message.exec();
+	m_pButtonSet_left_set->setEnabled(true);
+}
 
 /*
 初始化界面
@@ -940,6 +1404,10 @@ void    Lifter_client_mscv::show_ui_ControlRes(int ret)
 */
 void Lifter_client_mscv::InitMainWnd()
 {
+
+	//左边 整体布局
+	QGridLayout* pGridLeft_right = new QGridLayout;
+	QGridLayout* pGridLeft_left = new QGridLayout;
 	int iWidth = 1366, iHeight = 768;
 	QWidget* pCenterWnd = new QWidget;
 	pCenterWnd->setMinimumSize(iWidth, iHeight);
@@ -960,32 +1428,31 @@ void Lifter_client_mscv::InitMainWnd()
 #ifdef UIYCKZ_LEFT
 	QGroupBox* pGbLeftYckz_left = new QGroupBox; //远程控制
 	pGbLeftYckz_left->setTitle("远程控制");
-	QPushButton* pButtonSx_left = new QPushButton("上行");
-	QPushButton* pButtonXx_left = new QPushButton("下行");
-	QPushButton* pButtonJx_left = new QPushButton("检修");
-	QPushButton* pButtonZd_left = new QPushButton("制动");
-	QPushButton* pButtonJt_left = new QPushButton("急停");
+	QPushButton* pButtonShangX_left = new QPushButton("上行");
+	QPushButton* pButtonXiaX_left = new QPushButton("下行");
+	QPushButton* pButtonFuW_left = new QPushButton("故障报警/复位");
+	//QPushButton* pButtonZd_left = new QPushButton("制动");
+	QPushButton* pButtonJiT_left = new QPushButton("急停");
 
-	QPushButton* pButtonCzbh_left = new QPushButton("超载保护");
-	QPushButton* pButtonSxw_left = new QPushButton("上限位");
-	QPushButton* pButtonXxw_left = new QPushButton("下限位");
-	QPushButton* pButtonSjx_left = new QPushButton("上极限");
-	QPushButton* pButtonXjx_left = new QPushButton("下极限");
-	QPushButton* pButtonJtkg_left = new QPushButton("急停开关");
+	QPushButton* pButtonQiD_left = new QPushButton("电铃/启动");
+	QPushButton* pButtonRenLSB_left = new QPushButton("人脸识别");
+	QPushButton* pButtonYaoS_left = new QPushButton("钥匙");
+	QPushButton* pButtonJiaSUp_left = new QPushButton("加速");
+	QPushButton* pButtonJiaSDown_left = new QPushButton("加速");
+	//QPushButton* pButtonJtkg_left = new QPushButton("急停开关");
+
+	m_button_ID_left[pButtonShangX_left] = JDQ_DO_flag_shangX;
+	m_button_ID_left[pButtonXiaX_left] = JDQ_DO_flag_xiaX;
+	m_button_ID_left[pButtonFuW_left] = JDQ_DO_flag_fuW;
+	m_button_ID_left[pButtonJiT_left] = JDQ_DO_flag_jiT;
+	m_button_ID_left[pButtonQiD_left] = JDQ_DO_flag_qiD;
+	m_button_ID_left[pButtonRenLSB_left]= JDQ_DO_flag_renLSB;
+	m_button_ID_left[pButtonYaoS_left] = JDQ_DO_flag_yaoS;
+	m_button_ID_left[pButtonJiaSUp_left] = JDQ_DO_flag_jiaS;
+	m_button_ID_left[pButtonJiaSDown_left] = JDQ_DO_flag_jiaS;
 
 
-	m_button_ID_left[pButtonSx_left] = QString("20020007");
-	m_button_ID_left[pButtonXx_left] = QString("20020008");
-	m_button_ID_left[pButtonZd_left] = QString("20020009");
-	m_button_ID_left[pButtonJt_left] = QString("20020012");
-	m_button_ID_left[pButtonJx_left] = QString("20020013");
-	m_button_ID_left[pButtonCzbh_left] = QString("20020014");
-	m_button_ID_left[pButtonSxw_left] = QString("20020015");
-	m_button_ID_left[pButtonXxw_left] = QString("20020016");
-	m_button_ID_left[pButtonSjx_left] = QString("20020017");
-	m_button_ID_left[pButtonXjx_left] = QString("20020018");
-	m_button_ID_left[pButtonJtkg_left] = QString("20020019");
-
+	
 	//1.1.1设置控件的属性
 	QMap<QPushButton*, QString>::iterator begin_left = m_button_ID_left.begin()
 		, end_left = m_button_ID_left.end();
@@ -1000,21 +1467,43 @@ void Lifter_client_mscv::InitMainWnd()
 		}
 		pTemp_left->installEventFilter(this);
 		pTemp_left->setStyleSheet(m_button_state_old_style);
+		m_BtAttribute_left[pTemp_left] = new BtAttribute(pTemp_left->text());
 	}
+	//1.1.1.1 设置上、下、加速 按钮 相关联的 控件 指针
+	//上行
+	m_BtAttribute_left[pButtonShangX_left]->m_bt_renLSB = pButtonRenLSB_left;
+	m_BtAttribute_left[pButtonShangX_left]->m_bt_yaoS = pButtonYaoS_left;
+	m_BtAttribute_left[pButtonShangX_left]->m_bt_qiD = pButtonQiD_left;
+
+	//下行
+	m_BtAttribute_left[pButtonXiaX_left]->m_bt_renLSB = pButtonRenLSB_left;
+	m_BtAttribute_left[pButtonXiaX_left]->m_bt_yaoS = pButtonYaoS_left;
+	m_BtAttribute_left[pButtonXiaX_left]->m_bt_qiD = pButtonQiD_left;
+
+	//加速 下、上
+	m_BtAttribute_left[pButtonJiaSDown_left]->m_bt_dir = pButtonXiaX_left;
+	m_BtAttribute_left[pButtonJiaSUp_left]->m_bt_dir = pButtonShangX_left;
+
+	//上、下 互斥
+	m_BtAttribute_left[pButtonXiaX_left]->m_bt_dir = pButtonShangX_left;
+	m_BtAttribute_left[pButtonShangX_left]->m_bt_dir = pButtonXiaX_left;
+
+	//上、下 绑定的加速 按钮
+	m_BtAttribute_left[pButtonXiaX_left]->m_bt_jiaS = pButtonJiaSDown_left;
+	m_BtAttribute_left[pButtonShangX_left]->m_bt_jiaS = pButtonJiaSUp_left;
+
 
 	//1.1.2 远程控制 模块 网格布局
 	QGridLayout* pGrid_left = new QGridLayout;
-	pGrid_left->addWidget(pButtonSx_left, 1, 1);
-	pGrid_left->addWidget(pButtonXx_left, 1, 2);
-	pGrid_left->addWidget(pButtonJx_left, 2, 1);
-	pGrid_left->addWidget(pButtonZd_left, 2, 2);
-	pGrid_left->addWidget(pButtonJt_left, 3, 1);
-	pGrid_left->addWidget(pButtonCzbh_left, 3, 2);
-	pGrid_left->addWidget(pButtonSxw_left, 4, 1);
-	pGrid_left->addWidget(pButtonXxw_left, 4, 2);
-	pGrid_left->addWidget(pButtonSjx_left, 5, 1);
-	pGrid_left->addWidget(pButtonXjx_left, 5, 2);
-	pGrid_left->addWidget(pButtonJtkg_left, 6, 1);
+	pGrid_left->addWidget(pButtonShangX_left, 4, 1);
+	pGrid_left->addWidget(pButtonXiaX_left, 5, 1);
+	pGrid_left->addWidget(pButtonFuW_left, 3, 2);
+	pGrid_left->addWidget(pButtonJiT_left, 3, 1);
+	pGrid_left->addWidget(pButtonQiD_left, 2, 1);
+	pGrid_left->addWidget(pButtonRenLSB_left, 1, 1);
+	pGrid_left->addWidget(pButtonYaoS_left, 1, 2);
+	pGrid_left->addWidget(pButtonJiaSUp_left, 4, 2); 
+	pGrid_left->addWidget(pButtonJiaSDown_left, 5, 2);
 	pGbLeftYckz_left->setLayout(pGrid_left);
 #endif
 	//1.2 运行状态
@@ -1117,70 +1606,116 @@ void Lifter_client_mscv::InitMainWnd()
 	//1.3 电压 电流 频率 监测状态
 #define  UIDYDL_LEFT
 #ifdef  UIDYDL_LEFT
-	QGroupBox* pGbLeftDydljczt_left = new QGroupBox; //电压 电流 频率 监测状态
-	pGbLeftDydljczt_left->setTitle("电压 电流 频率 检测状态");
+	QGroupBox* pGbLeftDydljczt_left_show = new QGroupBox; //电压 电流 频率 监测状态
+	pGbLeftDydljczt_left_show->setTitle("电压 电流 频率 检测状态");
 
-	/*图表显示*/
-	QLineSeries *series_left = new QLineSeries();
+	QLabel* pLabelDy_text_left_show = new QLabel("电压:");
+	QLabel* pLabelDl_text_left_show = new QLabel("电流:");
+	QLabel* pLabelPl_text_left_show = new QLabel("频率:");
 
-	series_left->append(0, 6);
-	series_left->append(2, 4);
-	series_left->append(3, 8);
-	series_left->append(7, 4);
-	series_left->append(10, 5);
-	*series_left << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3) << QPointF(20, 2);
+	QLabel* pLabelTitle_left_show_A = new QLabel("A相");
+	QLabel* pLabelTitle_left_show_B = new QLabel("B相");
+	QLabel* pLabelTitle_left_show_C = new QLabel("C相");
+
+	//A
+	QLabel* pLabelDy_text_left_show_A = new QLabel("电压A");
+	QLabel* pLabelDl_text_left_show_A = new QLabel("电流A");
+	QLabel* pLabelPl_text_left_show_A = new QLabel("频率A");
+	//B
+	QLabel* pLabelDy_text_left_show_B = new QLabel("电压B");
+	QLabel* pLabelDl_text_left_show_B = new QLabel("电流B");
+	QLabel* pLabelPl_text_left_show_B = new QLabel("频率B");
+	//C
+	QLabel* pLabelDy_text_left_show_C = new QLabel("电压C");
+	QLabel* pLabelDl_text_left_show_C = new QLabel("电流C");
+	QLabel* pLabelPl_text_left_show_C = new QLabel("频率C");
+
+	//保存变量
+	//A相
+	m_label_dydl_show_left[DYDATA_SHOW_DY][DYDATA_DYDLPL_A] = pLabelDy_text_left_show_A;
+	m_label_dydl_show_left[DYDATA_SHOW_DL][DYDATA_DYDLPL_A] = pLabelDl_text_left_show_A;
+	m_label_dydl_show_left[DYDATA_SHOW_PL][DYDATA_DYDLPL_A] = pLabelPl_text_left_show_A;
+	//B相
+	m_label_dydl_show_left[DYDATA_SHOW_DY][DYDATA_DYDLPL_B] = pLabelDy_text_left_show_B;
+	m_label_dydl_show_left[DYDATA_SHOW_DL][DYDATA_DYDLPL_B] = pLabelDl_text_left_show_B;
+	m_label_dydl_show_left[DYDATA_SHOW_PL][DYDATA_DYDLPL_B] = pLabelPl_text_left_show_B;
+	//C相
+	m_label_dydl_show_left[DYDATA_SHOW_DY][DYDATA_DYDLPL_C] = pLabelDy_text_left_show_C;
+	m_label_dydl_show_left[DYDATA_SHOW_DL][DYDATA_DYDLPL_C] = pLabelDl_text_left_show_C;
+	m_label_dydl_show_left[DYDATA_SHOW_PL][DYDATA_DYDLPL_C] = pLabelPl_text_left_show_C;
 
 
-	for (float index = 0; index < 10; index += 0.5)
-	{
-		series_left->append(index, qSin(index));
-	}
-	QChart *chart_left = new QChart();
-	chart_left->legend()->hide();
-	chart_left->addSeries(series_left);
-	chart_left->createDefaultAxes();
-	chart_left->setTitle("Simple line chart example");
+	QGridLayout* pGridDydl_left_show = new QGridLayout;
+	//标题
+	pGridDydl_left_show->addWidget(pLabelTitle_left_show_A, 0, 0);
+	pGridDydl_left_show->addWidget(pLabelTitle_left_show_B, 0, 1);
+	pGridDydl_left_show->addWidget(pLabelTitle_left_show_C, 0, 2);
+	//A相
+	pGridDydl_left_show->addWidget(pLabelDy_text_left_show_A, 1, 0);
+	pGridDydl_left_show->addWidget(pLabelDl_text_left_show_A, 2, 0);
+	pGridDydl_left_show->addWidget(pLabelPl_text_left_show_A, 3, 0);
+	//B相
+	pGridDydl_left_show->addWidget(pLabelDy_text_left_show_B, 1, 1);
+	pGridDydl_left_show->addWidget(pLabelDl_text_left_show_B, 2, 1);
+	pGridDydl_left_show->addWidget(pLabelPl_text_left_show_B, 3, 1);
+	//C相
+	pGridDydl_left_show->addWidget(pLabelDy_text_left_show_C, 1, 2);
+	pGridDydl_left_show->addWidget(pLabelDl_text_left_show_C, 2, 2);
+	pGridDydl_left_show->addWidget(pLabelPl_text_left_show_C, 3, 2);
 
-	
-	QChartView* pChartView_left = new QChartView;
-	pChartView_left->setChart(chart_left);
+	pGbLeftDydljczt_left_show->setLayout(pGridDydl_left_show);
+	//////////////////////////////////////////////////////////////////////////
+	//设置
 	/*说明*/
-	//电压说明
-	QLabel* pLabelDySm_left = new QLabel("分辨力0.1v、精度0.2%rdg+0.2%FS");
-	//电流说明
-	QLabel* pLabelDlSm_left = new QLabel("分辨力0.1A/1A，精度0.3%rdg+0.3%FS");
-
-	//频率说明
-	QLabel* pLabelPlSm_left = new QLabel("分辨力0.1Hz、精度0.05%");
-
-	QLabel* pLabelDy_text_left = new QLabel("电压:");
-	QLabel* pLabelDl_text_left = new QLabel("电流:");
-	QLabel* pLabelPl_text_left = new QLabel("频率:");
+	QLabel* pLabelDy_text_left_set = new QLabel("电压:");
+	QLabel* pLabelDl_text_left_set = new QLabel("电流:");
+	QLabel* pLabelPl_text_left_set = new QLabel("频率:");
 	//电压
-	QLineEdit* pLabelDy_left = new QLineEdit();
+	QLineEdit* pLabelDy_left_set = new QLineEdit();
 	//电流
-	QLineEdit* pLabelDl_left = new QLineEdit();
-
+	QLineEdit* pLabelDl_left_set = new QLineEdit();
 	//频率
-	QLineEdit* pLabelPl_left = new QLineEdit();
+	QLineEdit* pLabelPl_left_set = new QLineEdit();
+
+	//保存变量
+	m_edit_dydl_set_left[DYDATA_SHOW_DY] = pLabelDy_left_set;
+	m_edit_dydl_set_left[DYDATA_SHOW_DL] = pLabelDl_left_set;
+	m_edit_dydl_set_left[DYDATA_SHOW_PL] = pLabelPl_left_set;
+
+	QPushButton*  pButtonSet_left_set = new QPushButton("设置");
+	pButtonSet_left_set->setMinimumHeight(20);
+	connect(pButtonSet_left_set, &QPushButton::clicked, this
+		, &Lifter_client_mscv::on_pushButton_dySet_left);
+	m_pButtonSet_left_set = pButtonSet_left_set;
+
+	//设置
+	QGridLayout* pGridDydl_left_set = new QGridLayout;
+	pGridDydl_left_set->addWidget(pLabelDy_text_left_set, 0, 0);
+	pGridDydl_left_set->addWidget(pLabelDy_left_set, 0, 1);
+
+
+	pGridDydl_left_set->addWidget(pLabelDl_text_left_set, 1, 0);
+	pGridDydl_left_set->addWidget(pLabelDl_left_set, 1, 1);
+
+
+	pGridDydl_left_set->addWidget(pLabelPl_text_left_set, 2, 0);
+	pGridDydl_left_set->addWidget(pLabelPl_left_set, 2, 1);
+
+	pGridDydl_left_set->addWidget(pButtonSet_left_set, 3, 1);
+
+
+
+	QGroupBox* pGbLeftDydljczt_left_set = new QGroupBox; //电压 电流 频率 监测状态
+	pGbLeftDydljczt_left_set->setTitle("设置");
+	pGbLeftDydljczt_left_set->setLayout(pGridDydl_left_set);
+
 
 	QGridLayout* pGridDydl_left = new QGridLayout;
-	
-	pGridDydl_left->addWidget(pLabelDy_text_left, 0, 0);
-	pGridDydl_left->addWidget(pLabelDy_left, 0, 1);
-	pGridDydl_left->addWidget(pLabelDySm_left, 1, 0,1,4);
+	pGridDydl_left->addWidget(pGbLeftDydljczt_left_show, 0, 0);
+	pGridDydl_left->addWidget(pGbLeftDydljczt_left_set, 1, 0);
 
-	pGridDydl_left->addWidget(pLabelDl_text_left, 2, 0);
-	pGridDydl_left->addWidget(pLabelDl_left, 2, 1);
-	pGridDydl_left->addWidget(pLabelDlSm_left, 3, 0,1,4);
+	pGridLeft_left->addLayout(pGridDydl_left, 2, 0);
 
-	pGridDydl_left->addWidget(pLabelPl_text_left, 4, 0);
-	pGridDydl_left->addWidget(pLabelPl_left, 4, 1);
-	pGridDydl_left->addWidget(pLabelPlSm_left, 5, 0,1,4);
-
-
-
-	pGbLeftDydljczt_left->setLayout(pGridDydl_left);
 #endif
 	//1.4 应力 监测  编码器 监测
 #define  UIYLJC_LEFT
@@ -1286,10 +1821,10 @@ void Lifter_client_mscv::InitMainWnd()
 	pGbLeftYljc_left->setLayout(pLayoutYl_left);
 #endif
 	//左边 整体布局
-	QGridLayout* pGridLeft_left = new QGridLayout;
+	
 	pGridLeft_left->addWidget(pGbLeftYckz_left, 0, 0);
 	pGridLeft_left->addWidget(pGbLeftYxzt_left, 1, 0);
-	pGridLeft_left->addWidget(pGbLeftDydljczt_left, 2, 0);
+	
 	pGridLeft_left->addWidget(pGbLeftYljc_left, 0, 1, 3, 1);
 
 	//设置 行比
@@ -1312,33 +1847,32 @@ void Lifter_client_mscv::InitMainWnd()
 #ifdef UIYCKZ_RIGHT
 	QGroupBox* pGbLeftYckz_right = new QGroupBox; //远程控制
 	pGbLeftYckz_right->setTitle("远程控制");
-	QPushButton* pButtonSx_right = new QPushButton("上行");
-	QPushButton* pButtonXx_right = new QPushButton("下行");
-	QPushButton* pButtonJx_right = new QPushButton("检修");
-	QPushButton* pButtonZd_right = new QPushButton("制动");
-	QPushButton* pButtonJt_right = new QPushButton("急停");
+	QPushButton* pButtonShangX_right = new QPushButton("上行");
+	QPushButton* pButtonXiaX_right = new QPushButton("下行");
+	QPushButton* pButtonFuW_right = new QPushButton("故障报警/复位");
+	//QPushButton* pButtonZd_right = new QPushButton("制动");
+	QPushButton* pButtonJiT_right = new QPushButton("急停");
 
-	QPushButton* pButtonCzbh_right = new QPushButton("超载保护");
-	QPushButton* pButtonSxw_right = new QPushButton("上限位");
-	QPushButton* pButtonXxw_right = new QPushButton("下限位");
-	QPushButton* pButtonSjx_right = new QPushButton("上极限");
-	QPushButton* pButtonXjx_right = new QPushButton("下极限");
-	QPushButton* pButtonJtkg_right = new QPushButton("急停开关");
+	QPushButton* pButtonQiD_right = new QPushButton("电铃/启动");
+	QPushButton* pButtonRenLSB_right = new QPushButton("人脸识别");
+	QPushButton* pButtonYaoS_right = new QPushButton("钥匙");
+	QPushButton* pButtonJiaSUp_right = new QPushButton("加速");
+	QPushButton* pButtonJiaSDown_right = new QPushButton("加速");
+	//QPushButton* pButtonJtkg_right = new QPushButton("急停开关");
+
+	m_button_ID_right[pButtonShangX_right] = JDQ_DO_flag_shangX;
+	m_button_ID_right[pButtonXiaX_right] = JDQ_DO_flag_xiaX;
+	m_button_ID_right[pButtonFuW_right] = JDQ_DO_flag_fuW;
+	m_button_ID_right[pButtonJiT_right] = JDQ_DO_flag_jiT;
+	m_button_ID_right[pButtonQiD_right] = JDQ_DO_flag_qiD;
+	m_button_ID_right[pButtonRenLSB_right] = JDQ_DO_flag_renLSB;
+	m_button_ID_right[pButtonYaoS_right] = JDQ_DO_flag_yaoS;
+	m_button_ID_right[pButtonJiaSUp_right] = JDQ_DO_flag_jiaS;
+	m_button_ID_right[pButtonJiaSDown_right] = JDQ_DO_flag_jiaS;
 
 
-	m_button_ID_right[pButtonSx_right] = QString("20020007");
-	m_button_ID_right[pButtonXx_right] = QString("20020008");
-	m_button_ID_right[pButtonZd_right] = QString("20020009");
-	m_button_ID_right[pButtonJt_right] = QString("20020012");
-	m_button_ID_right[pButtonJx_right] = QString("20020013");
-	m_button_ID_right[pButtonCzbh_right] = QString("20020014");
-	m_button_ID_right[pButtonSxw_right] = QString("20020015");
-	m_button_ID_right[pButtonXxw_right] = QString("20020016");
-	m_button_ID_right[pButtonSjx_right] = QString("20020017");
-	m_button_ID_right[pButtonXjx_right] = QString("20020018");
-	m_button_ID_right[pButtonJtkg_right] = QString("20020019");
 
-	//2.1.1设置控件的属性
+	//1.1.1设置控件的属性
 	QMap<QPushButton*, QString>::iterator begin_right = m_button_ID_right.begin()
 		, end_right = m_button_ID_right.end();
 	QPushButton* pTemp_right = nullptr;
@@ -1352,21 +1886,43 @@ void Lifter_client_mscv::InitMainWnd()
 		}
 		pTemp_right->installEventFilter(this);
 		pTemp_right->setStyleSheet(m_button_state_old_style);
+		m_BtAttribute_right[pTemp_right] = new BtAttribute(pTemp_right->text());
 	}
+	//1.1.1.1 设置上、下、加速 按钮 相关联的 控件 指针
+	//上行
+	m_BtAttribute_right[pButtonShangX_right]->m_bt_renLSB = pButtonRenLSB_right;
+	m_BtAttribute_right[pButtonShangX_right]->m_bt_yaoS = pButtonYaoS_right;
+	m_BtAttribute_right[pButtonShangX_right]->m_bt_qiD = pButtonQiD_right;
 
-	//2.1.2 远程控制 模块 网格布局
+	//下行
+	m_BtAttribute_right[pButtonXiaX_right]->m_bt_renLSB = pButtonRenLSB_right;
+	m_BtAttribute_right[pButtonXiaX_right]->m_bt_yaoS = pButtonYaoS_right;
+	m_BtAttribute_right[pButtonXiaX_right]->m_bt_qiD = pButtonQiD_right;
+
+	//加速 下、上
+	m_BtAttribute_right[pButtonJiaSDown_right]->m_bt_dir = pButtonXiaX_right;
+	m_BtAttribute_right[pButtonJiaSUp_right]->m_bt_dir = pButtonShangX_right;
+
+	//上、下 互斥
+	m_BtAttribute_right[pButtonXiaX_right]->m_bt_dir = pButtonShangX_right;
+	m_BtAttribute_right[pButtonShangX_right]->m_bt_dir = pButtonXiaX_right;
+
+	//上、下 绑定的加速 按钮
+	m_BtAttribute_right[pButtonXiaX_right]->m_bt_jiaS = pButtonJiaSDown_right;
+	m_BtAttribute_right[pButtonShangX_right]->m_bt_jiaS = pButtonJiaSUp_right;
+
+
+	//1.1.2 远程控制 模块 网格布局
 	QGridLayout* pGrid_right = new QGridLayout;
-	pGrid_right->addWidget(pButtonSx_right, 1, 1);
-	pGrid_right->addWidget(pButtonXx_right, 1, 2);
-	pGrid_right->addWidget(pButtonJx_right, 2, 1);
-	pGrid_right->addWidget(pButtonZd_right, 2, 2);
-	pGrid_right->addWidget(pButtonJt_right, 3, 1);
-	pGrid_right->addWidget(pButtonCzbh_right, 3, 2);
-	pGrid_right->addWidget(pButtonSxw_right, 4, 1);
-	pGrid_right->addWidget(pButtonXxw_right, 4, 2);
-	pGrid_right->addWidget(pButtonSjx_right, 5, 1);
-	pGrid_right->addWidget(pButtonXjx_right, 5, 2);
-	pGrid_right->addWidget(pButtonJtkg_right, 6, 1);
+	pGrid_right->addWidget(pButtonShangX_right, 4, 1);
+	pGrid_right->addWidget(pButtonXiaX_right, 5, 1);
+	pGrid_right->addWidget(pButtonFuW_right, 3, 2);
+	pGrid_right->addWidget(pButtonJiT_right, 3, 1);
+	pGrid_right->addWidget(pButtonQiD_right, 2, 1);
+	pGrid_right->addWidget(pButtonRenLSB_right, 1, 1);
+	pGrid_right->addWidget(pButtonYaoS_right, 1, 2);
+	pGrid_right->addWidget(pButtonJiaSUp_right, 4, 2);
+	pGrid_right->addWidget(pButtonJiaSDown_right, 5, 2);
 	pGbLeftYckz_right->setLayout(pGrid_right);
 #endif
 	//2.2 运行状态
@@ -1469,70 +2025,114 @@ void Lifter_client_mscv::InitMainWnd()
 	//2.3 电压 电流 频率 监测状态
 #define  UIDYDL_RIGHT
 #ifdef  UIDYDL_RIGHT
-	QGroupBox* pGbLeftDydljczt_right = new QGroupBox; //电压 电流 频率 监测状态
-	pGbLeftDydljczt_right->setTitle("电压 电流 频率 检测状态");
+	
+	QGroupBox* pGbLeftDydljczt_right_show = new QGroupBox; //电压 电流 频率 监测状态
+	pGbLeftDydljczt_right_show->setTitle("电压 电流 频率 检测状态");
+	
+	QLabel* pLabelDy_text_right_show = new QLabel("电压:");
+	QLabel* pLabelDl_text_right_show = new QLabel("电流:");
+	QLabel* pLabelPl_text_right_show = new QLabel("频率:");
 
-	/*图表显示*/
-	QLineSeries *series_right = new QLineSeries();
+	QLabel* pLabelTitle_right_show_A = new QLabel("A相");
+	QLabel* pLabelTitle_right_show_B = new QLabel("B相");
+	QLabel* pLabelTitle_right_show_C = new QLabel("C相");
 
-	series_right->append(0, 6);
-	series_right->append(2, 4);
-	series_right->append(3, 8);
-	series_right->append(7, 4);
-	series_right->append(10, 5);
-	*series_right << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3) << QPointF(20, 2);
+	//A
+	QLabel* pLabelDy_text_right_show_A = new QLabel("电压A");
+	QLabel* pLabelDl_text_right_show_A = new QLabel("电流A");
+	QLabel* pLabelPl_text_right_show_A = new QLabel("频率A");
+	//B
+	QLabel* pLabelDy_text_right_show_B = new QLabel("电压B");
+	QLabel* pLabelDl_text_right_show_B = new QLabel("电流B");
+	QLabel* pLabelPl_text_right_show_B = new QLabel("频率B");
+	//C
+	QLabel* pLabelDy_text_right_show_C = new QLabel("电压C");
+	QLabel* pLabelDl_text_right_show_C = new QLabel("电流C");
+	QLabel* pLabelPl_text_right_show_C = new QLabel("频率C");
+
+	//保存变量
+	//A相
+	m_label_dydl_show_right[DYDATA_SHOW_DY][DYDATA_DYDLPL_A] = pLabelDy_text_right_show_A;
+	m_label_dydl_show_right[DYDATA_SHOW_DL][DYDATA_DYDLPL_A] = pLabelDl_text_right_show_A;
+	m_label_dydl_show_right[DYDATA_SHOW_PL][DYDATA_DYDLPL_A] = pLabelPl_text_right_show_A;
+	//B相
+	m_label_dydl_show_right[DYDATA_SHOW_DY][DYDATA_DYDLPL_B] = pLabelDy_text_right_show_B;
+	m_label_dydl_show_right[DYDATA_SHOW_DL][DYDATA_DYDLPL_B] = pLabelDl_text_right_show_B;
+	m_label_dydl_show_right[DYDATA_SHOW_PL][DYDATA_DYDLPL_B] = pLabelPl_text_right_show_B;
+	//C相
+	m_label_dydl_show_right[DYDATA_SHOW_DY][DYDATA_DYDLPL_C] = pLabelDy_text_right_show_C;
+	m_label_dydl_show_right[DYDATA_SHOW_DL][DYDATA_DYDLPL_C] = pLabelDl_text_right_show_C;
+	m_label_dydl_show_right[DYDATA_SHOW_PL][DYDATA_DYDLPL_C] = pLabelPl_text_right_show_C;
 
 
-	for (float index = 0; index < 10; index += 0.5)
-	{
-		series_right->append(index, qSin(index));
-	}
-	QChart *chart_right = new QChart();
-	chart_right->legend()->hide();
-	chart_right->addSeries(series_right);
-	chart_right->createDefaultAxes();
-	chart_right->setTitle("Simple line chart example");
 
+	QGridLayout* pGridDydl_right_show = new QGridLayout;
+	//标题
+	pGridDydl_right_show->addWidget(pLabelTitle_right_show_A, 0, 0);
+	pGridDydl_right_show->addWidget(pLabelTitle_right_show_B, 0, 1);
+	pGridDydl_right_show->addWidget(pLabelTitle_right_show_C, 0, 2);
+	//A相
+	pGridDydl_right_show->addWidget(pLabelDy_text_right_show_A, 1, 0);
+	pGridDydl_right_show->addWidget(pLabelDl_text_right_show_A, 2, 0);
+	pGridDydl_right_show->addWidget(pLabelPl_text_right_show_A, 3, 0);
+	//B相
+	pGridDydl_right_show->addWidget(pLabelDy_text_right_show_B, 1, 1);
+	pGridDydl_right_show->addWidget(pLabelDl_text_right_show_B, 2, 1);
+	pGridDydl_right_show->addWidget(pLabelPl_text_right_show_B, 3, 1);
+	//C相
+	pGridDydl_right_show->addWidget(pLabelDy_text_right_show_C, 1, 2);
+	pGridDydl_right_show->addWidget(pLabelDl_text_right_show_C, 2, 2);
+	pGridDydl_right_show->addWidget(pLabelPl_text_right_show_C, 3, 2);
 
-	QChartView* pChartView_right = new QChartView;
-	pChartView_right->setChart(chart_right);
+	pGbLeftDydljczt_right_show->setLayout(pGridDydl_right_show);
+	//////////////////////////////////////////////////////////////////////////
+	//设置
 	/*说明*/
-	//电压说明
-	QLabel* pLabelDySm_right = new QLabel("分辨力0.1v、精度0.2%rdg+0.2%FS");
-	//电流说明
-	QLabel* pLabelDlSm_right = new QLabel("分辨力0.1A/1A，精度0.3%rdg+0.3%FS");
-
-	//频率说明
-	QLabel* pLabelPlSm_right = new QLabel("分辨力0.1Hz、精度0.05%");
-
-	QLabel* pLabelDy_text_right = new QLabel("电压:");
-	QLabel* pLabelDl_text_right = new QLabel("电流:");
-	QLabel* pLabelPl_text_right = new QLabel("频率:");
+	QLabel* pLabelDy_text_right_set = new QLabel("电压:");
+	QLabel* pLabelDl_text_right_set = new QLabel("电流:");
+	QLabel* pLabelPl_text_right_set = new QLabel("频率:");
 	//电压
-	QLineEdit* pLabelDy_right = new QLineEdit();
+	QLineEdit* pLabelDy_right_set = new QLineEdit();
 	//电流
-	QLineEdit* pLabelDl_right = new QLineEdit();
-
+	QLineEdit* pLabelDl_right_set = new QLineEdit();
 	//频率
-	QLineEdit* pLabelPl_right = new QLineEdit();
+	QLineEdit* pLabelPl_right_set = new QLineEdit();
+
+	//保存变量
+	m_edit_dydl_set_right[DYDATA_SHOW_DY] = pLabelDy_right_set;
+	m_edit_dydl_set_right[DYDATA_SHOW_DL] = pLabelDl_right_set;
+	m_edit_dydl_set_right[DYDATA_SHOW_PL] = pLabelPl_right_set;
+
+	QPushButton*  pButtonSet_right_set = new QPushButton("设置");
+	pButtonSet_right_set->setMinimumHeight(20);
+	connect(pButtonSet_right_set, &QPushButton::clicked, this, &Lifter_client_mscv::on_pushButton_dySet_right);
+	m_pButtonSet_right_set = pButtonSet_right_set;
+	//设置
+	QGridLayout* pGridDydl_right_set = new QGridLayout;
+	pGridDydl_right_set->addWidget(pLabelDy_text_right_set, 0, 0);
+	pGridDydl_right_set->addWidget(pLabelDy_right_set, 0, 1);
+
+
+	pGridDydl_right_set->addWidget(pLabelDl_text_right_set, 1, 0);
+	pGridDydl_right_set->addWidget(pLabelDl_right_set, 1, 1);
+
+
+	pGridDydl_right_set->addWidget(pLabelPl_text_right_set, 2, 0);
+	pGridDydl_right_set->addWidget(pLabelPl_right_set, 2, 1);
+
+	pGridDydl_right_set->addWidget(pButtonSet_right_set, 3, 1);
+
+	QGroupBox* pGbLeftDydljczt_right_set = new QGroupBox; //电压 电流 频率 监测状态
+	pGbLeftDydljczt_right_set->setTitle("设置");
+	pGbLeftDydljczt_right_set->setLayout(pGridDydl_right_set);
+
 
 	QGridLayout* pGridDydl_right = new QGridLayout;
+	pGridDydl_right->addWidget(pGbLeftDydljczt_right_show, 0, 0);
+	pGridDydl_right->addWidget(pGbLeftDydljczt_right_set, 1, 0);
 
-	pGridDydl_right->addWidget(pLabelDy_text_right, 0, 0);
-	pGridDydl_right->addWidget(pLabelDy_right, 0, 1);
-	pGridDydl_right->addWidget(pLabelDySm_right, 1, 0, 1, 4);
+	pGridLeft_right->addLayout(pGridDydl_right, 2, 0);
 
-	pGridDydl_right->addWidget(pLabelDl_text_right, 2, 0);
-	pGridDydl_right->addWidget(pLabelDl_right, 2, 1);
-	pGridDydl_right->addWidget(pLabelDlSm_right, 3, 0, 1, 4);
-
-	pGridDydl_right->addWidget(pLabelPl_text_right, 4, 0);
-	pGridDydl_right->addWidget(pLabelPl_right, 4, 1);
-	pGridDydl_right->addWidget(pLabelPlSm_right, 5, 0, 1, 4);
-
-
-
-	pGbLeftDydljczt_right->setLayout(pGridDydl_right);
 #endif
 	//2.4 应力 监测  编码器 监测
 #define  UIYLJC_RIGHT
@@ -1639,11 +2239,10 @@ void Lifter_client_mscv::InitMainWnd()
 
 
 #endif
-	//左边 整体布局
-	QGridLayout* pGridLeft_right = new QGridLayout;
+
 	pGridLeft_right->addWidget(pGbLeftYckz_right, 0, 0);
 	pGridLeft_right->addWidget(pGbLeftYxzt_right, 1, 0);
-	pGridLeft_right->addWidget(pGbLeftDydljczt_right, 2, 0);
+	
 	pGridLeft_right->addWidget(pGbLeftYljc_right, 0, 1, 3, 1);
 
 	//设置 行比

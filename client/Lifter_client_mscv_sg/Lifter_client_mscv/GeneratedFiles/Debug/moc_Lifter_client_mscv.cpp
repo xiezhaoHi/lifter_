@@ -127,8 +127,8 @@ void TaskThread::show_button_zdy()
     QMetaObject::activate(this, &staticMetaObject, 0, Q_NULLPTR);
 }
 struct qt_meta_stringdata_Lifter_client_mscv_t {
-    QByteArrayData data[41];
-    char stringdata0[515];
+    QByteArrayData data[48];
+    char stringdata0[622];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -147,53 +147,63 @@ QT_MOC_LITERAL(6, 47, 8), // "strBmqID"
 QT_MOC_LITERAL(7, 56, 8), // "SetTitle"
 QT_MOC_LITERAL(8, 65, 7), // "strName"
 QT_MOC_LITERAL(9, 73, 17), // "ChangeButtonState"
-QT_MOC_LITERAL(10, 91, 18), // "show_ui_button_zdy"
-QT_MOC_LITERAL(11, 110, 15), // "get_task_result"
-QT_MOC_LITERAL(12, 126, 4), // "list"
-QT_MOC_LITERAL(13, 131, 5), // "times"
-QT_MOC_LITERAL(14, 137, 15), // "show_ui_CgqData"
-QT_MOC_LITERAL(15, 153, 7), // "strList"
-QT_MOC_LITERAL(16, 161, 18), // "QMap<int,QLabel*>&"
-QT_MOC_LITERAL(17, 180, 3), // "map"
-QT_MOC_LITERAL(18, 184, 15), // "show_ui_BmpData"
-QT_MOC_LITERAL(19, 200, 6), // "strDir"
-QT_MOC_LITERAL(20, 207, 3), // "iSd"
-QT_MOC_LITERAL(21, 211, 3), // "iWz"
-QT_MOC_LITERAL(22, 215, 4), // "zdjl"
-QT_MOC_LITERAL(23, 220, 15), // "show_ui_JdqData"
-QT_MOC_LITERAL(24, 236, 17), // "QMap<QString,int>"
-QT_MOC_LITERAL(25, 254, 22), // "QMap<QString,QLabel*>&"
-QT_MOC_LITERAL(26, 277, 6), // "map_id"
-QT_MOC_LITERAL(27, 284, 11), // "map_id_aqcd"
-QT_MOC_LITERAL(28, 296, 14), // "show_ui_YlData"
-QT_MOC_LITERAL(29, 311, 5), // "strTd"
-QT_MOC_LITERAL(30, 317, 7), // "strData"
-QT_MOC_LITERAL(31, 325, 19), // "QStandardItemModel*"
-QT_MOC_LITERAL(32, 345, 18), // "show_ui_ControlRes"
-QT_MOC_LITERAL(33, 364, 3), // "ret"
-QT_MOC_LITERAL(34, 368, 25), // "on_pushButton_zdy_clicked"
-QT_MOC_LITERAL(35, 394, 24), // "on_pushButton_sz_clicked"
-QT_MOC_LITERAL(36, 419, 7), // "checked"
-QT_MOC_LITERAL(37, 427, 19), // "on_action_triggered"
-QT_MOC_LITERAL(38, 447, 21), // "on_action_2_triggered"
-QT_MOC_LITERAL(39, 469, 21), // "on_action_3_triggered"
-QT_MOC_LITERAL(40, 491, 23) // "on_action_CAN_triggered"
+QT_MOC_LITERAL(10, 91, 16), // "ShowOnlineStatus"
+QT_MOC_LITERAL(11, 108, 18), // "show_ui_button_zdy"
+QT_MOC_LITERAL(12, 127, 15), // "get_task_result"
+QT_MOC_LITERAL(13, 143, 4), // "list"
+QT_MOC_LITERAL(14, 148, 5), // "times"
+QT_MOC_LITERAL(15, 154, 15), // "show_ui_CgqData"
+QT_MOC_LITERAL(16, 170, 7), // "strList"
+QT_MOC_LITERAL(17, 178, 18), // "QMap<int,QLabel*>&"
+QT_MOC_LITERAL(18, 197, 3), // "map"
+QT_MOC_LITERAL(19, 201, 15), // "show_ui_BmpData"
+QT_MOC_LITERAL(20, 217, 6), // "strDir"
+QT_MOC_LITERAL(21, 224, 3), // "iSd"
+QT_MOC_LITERAL(22, 228, 3), // "iWz"
+QT_MOC_LITERAL(23, 232, 4), // "zdjl"
+QT_MOC_LITERAL(24, 237, 15), // "show_ui_JdqData"
+QT_MOC_LITERAL(25, 253, 17), // "QMap<QString,int>"
+QT_MOC_LITERAL(26, 271, 22), // "QMap<QString,QLabel*>&"
+QT_MOC_LITERAL(27, 294, 6), // "map_id"
+QT_MOC_LITERAL(28, 301, 11), // "map_id_aqcd"
+QT_MOC_LITERAL(29, 313, 14), // "show_ui_YlData"
+QT_MOC_LITERAL(30, 328, 5), // "strTd"
+QT_MOC_LITERAL(31, 334, 7), // "strData"
+QT_MOC_LITERAL(32, 342, 19), // "QStandardItemModel*"
+QT_MOC_LITERAL(33, 362, 18), // "show_ui_ControlRes"
+QT_MOC_LITERAL(34, 381, 3), // "ret"
+QT_MOC_LITERAL(35, 385, 25), // "on_pushButton_zdy_clicked"
+QT_MOC_LITERAL(36, 411, 24), // "on_pushButton_sz_clicked"
+QT_MOC_LITERAL(37, 436, 7), // "checked"
+QT_MOC_LITERAL(38, 444, 14), // "show_ui_dyData"
+QT_MOC_LITERAL(39, 459, 8), // "QString&"
+QT_MOC_LITERAL(40, 468, 9), // "QLabel***"
+QT_MOC_LITERAL(41, 478, 25), // "on_pushButton_dySet_right"
+QT_MOC_LITERAL(42, 504, 4), // "flag"
+QT_MOC_LITERAL(43, 509, 24), // "on_pushButton_dySet_left"
+QT_MOC_LITERAL(44, 534, 19), // "on_action_triggered"
+QT_MOC_LITERAL(45, 554, 21), // "on_action_2_triggered"
+QT_MOC_LITERAL(46, 576, 21), // "on_action_3_triggered"
+QT_MOC_LITERAL(47, 598, 23) // "on_action_CAN_triggered"
 
     },
     "Lifter_client_mscv\0SetBmqConfig\0\0d\0p\0"
     "strLifter\0strBmqID\0SetTitle\0strName\0"
-    "ChangeButtonState\0show_ui_button_zdy\0"
-    "get_task_result\0list\0times\0show_ui_CgqData\0"
-    "strList\0QMap<int,QLabel*>&\0map\0"
-    "show_ui_BmpData\0strDir\0iSd\0iWz\0zdjl\0"
-    "show_ui_JdqData\0QMap<QString,int>\0"
-    "QMap<QString,QLabel*>&\0map_id\0map_id_aqcd\0"
-    "show_ui_YlData\0strTd\0strData\0"
-    "QStandardItemModel*\0show_ui_ControlRes\0"
-    "ret\0on_pushButton_zdy_clicked\0"
+    "ChangeButtonState\0ShowOnlineStatus\0"
+    "show_ui_button_zdy\0get_task_result\0"
+    "list\0times\0show_ui_CgqData\0strList\0"
+    "QMap<int,QLabel*>&\0map\0show_ui_BmpData\0"
+    "strDir\0iSd\0iWz\0zdjl\0show_ui_JdqData\0"
+    "QMap<QString,int>\0QMap<QString,QLabel*>&\0"
+    "map_id\0map_id_aqcd\0show_ui_YlData\0"
+    "strTd\0strData\0QStandardItemModel*\0"
+    "show_ui_ControlRes\0ret\0on_pushButton_zdy_clicked\0"
     "on_pushButton_sz_clicked\0checked\0"
-    "on_action_triggered\0on_action_2_triggered\0"
-    "on_action_3_triggered\0on_action_CAN_triggered"
+    "show_ui_dyData\0QString&\0QLabel***\0"
+    "on_pushButton_dySet_right\0flag\0"
+    "on_pushButton_dySet_left\0on_action_triggered\0"
+    "on_action_2_triggered\0on_action_3_triggered\0"
+    "on_action_CAN_triggered"
 };
 #undef QT_MOC_LITERAL
 
@@ -203,7 +213,7 @@ static const uint qt_meta_data_Lifter_client_mscv[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      16,   14, // methods
+      20,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -211,36 +221,44 @@ static const uint qt_meta_data_Lifter_client_mscv[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    4,   94,    2, 0x0a /* Public */,
-       7,    1,  103,    2, 0x0a /* Public */,
-       9,    0,  106,    2, 0x0a /* Public */,
-      10,    0,  107,    2, 0x0a /* Public */,
-      11,    2,  108,    2, 0x0a /* Public */,
-      14,    2,  113,    2, 0x0a /* Public */,
-      18,    5,  118,    2, 0x0a /* Public */,
-      23,    3,  129,    2, 0x0a /* Public */,
-      28,    3,  136,    2, 0x0a /* Public */,
-      32,    1,  143,    2, 0x0a /* Public */,
-      34,    0,  146,    2, 0x0a /* Public */,
-      35,    1,  147,    2, 0x0a /* Public */,
-      37,    0,  150,    2, 0x08 /* Private */,
-      38,    0,  151,    2, 0x08 /* Private */,
-      39,    0,  152,    2, 0x08 /* Private */,
-      40,    0,  153,    2, 0x08 /* Private */,
+       1,    4,  114,    2, 0x0a /* Public */,
+       7,    1,  123,    2, 0x0a /* Public */,
+       9,    0,  126,    2, 0x0a /* Public */,
+      10,    0,  127,    2, 0x0a /* Public */,
+      11,    0,  128,    2, 0x0a /* Public */,
+      12,    2,  129,    2, 0x0a /* Public */,
+      15,    2,  134,    2, 0x0a /* Public */,
+      19,    5,  139,    2, 0x0a /* Public */,
+      24,    3,  150,    2, 0x0a /* Public */,
+      29,    3,  157,    2, 0x0a /* Public */,
+      33,    1,  164,    2, 0x0a /* Public */,
+      35,    0,  167,    2, 0x0a /* Public */,
+      36,    1,  168,    2, 0x0a /* Public */,
+      38,    5,  171,    2, 0x0a /* Public */,
+      41,    1,  182,    2, 0x0a /* Public */,
+      43,    1,  185,    2, 0x0a /* Public */,
+      44,    0,  188,    2, 0x08 /* Private */,
+      45,    0,  189,    2, 0x08 /* Private */,
+      46,    0,  190,    2, 0x08 /* Private */,
+      47,    0,  191,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Double, QMetaType::Double, QMetaType::QString, QMetaType::QString,    3,    4,    5,    6,
     QMetaType::Void, QMetaType::QString,    8,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::QStringList, QMetaType::Int,   12,   13,
-    QMetaType::Void, QMetaType::QStringList, 0x80000000 | 16,   15,   17,
-    QMetaType::Void, QMetaType::QString, QMetaType::Double, QMetaType::Double, QMetaType::Double, 0x80000000 | 16,   19,   20,   21,   22,    2,
-    QMetaType::Void, 0x80000000 | 24, 0x80000000 | 25, 0x80000000 | 25,   17,   26,   27,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString, 0x80000000 | 31,   29,   30,    2,
-    QMetaType::Void, QMetaType::Int,   33,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Bool,   36,
+    QMetaType::Void, QMetaType::QStringList, QMetaType::Int,   13,   14,
+    QMetaType::Void, QMetaType::QStringList, 0x80000000 | 17,   16,   18,
+    QMetaType::Void, QMetaType::QString, QMetaType::Double, QMetaType::Double, QMetaType::Double, 0x80000000 | 17,   20,   21,   22,   23,    2,
+    QMetaType::Void, 0x80000000 | 25, 0x80000000 | 26, 0x80000000 | 26,   18,   27,   28,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString, 0x80000000 | 32,   30,   31,    2,
+    QMetaType::Void, QMetaType::Int,   34,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Bool,   37,
+    QMetaType::Void, QMetaType::Int, 0x80000000 | 39, 0x80000000 | 39, 0x80000000 | 39, 0x80000000 | 40,    2,    2,    2,    2,    2,
+    QMetaType::Void, QMetaType::Bool,   42,
+    QMetaType::Void, QMetaType::Bool,   42,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -258,25 +276,29 @@ void Lifter_client_mscv::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
         case 0: _t->SetBmqConfig((*reinterpret_cast< double(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< const QString(*)>(_a[3])),(*reinterpret_cast< const QString(*)>(_a[4]))); break;
         case 1: _t->SetTitle((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 2: _t->ChangeButtonState(); break;
-        case 3: _t->show_ui_button_zdy(); break;
-        case 4: _t->get_task_result((*reinterpret_cast< QStringList(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 5: _t->show_ui_CgqData((*reinterpret_cast< const QStringList(*)>(_a[1])),(*reinterpret_cast< QMap<int,QLabel*>(*)>(_a[2]))); break;
-        case 6: _t->show_ui_BmpData((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< double(*)>(_a[3])),(*reinterpret_cast< double(*)>(_a[4])),(*reinterpret_cast< QMap<int,QLabel*>(*)>(_a[5]))); break;
-        case 7: _t->show_ui_JdqData((*reinterpret_cast< QMap<QString,int>(*)>(_a[1])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[2])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[3]))); break;
-        case 8: _t->show_ui_YlData((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2])),(*reinterpret_cast< QStandardItemModel*(*)>(_a[3]))); break;
-        case 9: _t->show_ui_ControlRes((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 10: _t->on_pushButton_zdy_clicked(); break;
-        case 11: _t->on_pushButton_sz_clicked((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 12: _t->on_action_triggered(); break;
-        case 13: _t->on_action_2_triggered(); break;
-        case 14: _t->on_action_3_triggered(); break;
-        case 15: _t->on_action_CAN_triggered(); break;
+        case 3: _t->ShowOnlineStatus(); break;
+        case 4: _t->show_ui_button_zdy(); break;
+        case 5: _t->get_task_result((*reinterpret_cast< QStringList(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 6: _t->show_ui_CgqData((*reinterpret_cast< const QStringList(*)>(_a[1])),(*reinterpret_cast< QMap<int,QLabel*>(*)>(_a[2]))); break;
+        case 7: _t->show_ui_BmpData((*reinterpret_cast< QString(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< double(*)>(_a[3])),(*reinterpret_cast< double(*)>(_a[4])),(*reinterpret_cast< QMap<int,QLabel*>(*)>(_a[5]))); break;
+        case 8: _t->show_ui_JdqData((*reinterpret_cast< QMap<QString,int>(*)>(_a[1])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[2])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[3]))); break;
+        case 9: _t->show_ui_YlData((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2])),(*reinterpret_cast< QStandardItemModel*(*)>(_a[3]))); break;
+        case 10: _t->show_ui_ControlRes((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 11: _t->on_pushButton_zdy_clicked(); break;
+        case 12: _t->on_pushButton_sz_clicked((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 13: _t->show_ui_dyData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])),(*reinterpret_cast< QLabel***(*)>(_a[5]))); break;
+        case 14: _t->on_pushButton_dySet_right((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 15: _t->on_pushButton_dySet_left((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 16: _t->on_action_triggered(); break;
+        case 17: _t->on_action_2_triggered(); break;
+        case 18: _t->on_action_3_triggered(); break;
+        case 19: _t->on_action_CAN_triggered(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         switch (_id) {
         default: *reinterpret_cast<int*>(_a[0]) = -1; break;
-        case 8:
+        case 9:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 2:
@@ -312,19 +334,19 @@ int Lifter_client_mscv::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 16)
+        if (_id < 20)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 20;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 16)
+        if (_id < 20)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 20;
     }
     return _id;
 }
 struct qt_meta_stringdata_ShowWorker_t {
-    QByteArrayData data[25];
-    char stringdata0[262];
+    QByteArrayData data[28];
+    char stringdata0[292];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -355,9 +377,12 @@ QT_MOC_LITERAL(18, 176, 7), // "strData"
 QT_MOC_LITERAL(19, 184, 19), // "QStandardItemModel*"
 QT_MOC_LITERAL(20, 204, 14), // "showControlRes"
 QT_MOC_LITERAL(21, 219, 3), // "ret"
-QT_MOC_LITERAL(22, 223, 8), // "consumer"
-QT_MOC_LITERAL(23, 232, 14), // "analyseBmqData"
-QT_MOC_LITERAL(24, 247, 14) // "analyseAllData"
+QT_MOC_LITERAL(22, 223, 10), // "showdyData"
+QT_MOC_LITERAL(23, 234, 8), // "QString&"
+QT_MOC_LITERAL(24, 243, 9), // "QLabel***"
+QT_MOC_LITERAL(25, 253, 8), // "consumer"
+QT_MOC_LITERAL(26, 262, 14), // "analyseBmqData"
+QT_MOC_LITERAL(27, 277, 14) // "analyseAllData"
 
     },
     "ShowWorker\0showCgqData\0\0strList\0"
@@ -366,7 +391,8 @@ QT_MOC_LITERAL(24, 247, 14) // "analyseAllData"
     "QMap<QString,int>\0QMap<QString,QLabel*>&\0"
     "map_id\0map_id_aqcd\0showYlData\0strTd\0"
     "strData\0QStandardItemModel*\0showControlRes\0"
-    "ret\0consumer\0analyseBmqData\0analyseAllData"
+    "ret\0showdyData\0QString&\0QLabel***\0"
+    "consumer\0analyseBmqData\0analyseAllData"
 };
 #undef QT_MOC_LITERAL
 
@@ -376,24 +402,25 @@ static const uint qt_meta_data_ShowWorker[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       8,   14, // methods
+       9,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       5,       // signalCount
+       6,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    2,   54,    2, 0x06 /* Public */,
-       6,    5,   59,    2, 0x06 /* Public */,
-      11,    3,   70,    2, 0x06 /* Public */,
-      16,    3,   77,    2, 0x06 /* Public */,
-      20,    1,   84,    2, 0x06 /* Public */,
+       1,    2,   59,    2, 0x06 /* Public */,
+       6,    5,   64,    2, 0x06 /* Public */,
+      11,    3,   75,    2, 0x06 /* Public */,
+      16,    3,   82,    2, 0x06 /* Public */,
+      20,    1,   89,    2, 0x06 /* Public */,
+      22,    5,   92,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-      22,    0,   87,    2, 0x0a /* Public */,
-      23,    0,   88,    2, 0x0a /* Public */,
-      24,    0,   89,    2, 0x0a /* Public */,
+      25,    0,  103,    2, 0x0a /* Public */,
+      26,    0,  104,    2, 0x0a /* Public */,
+      27,    0,  105,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::QStringList, 0x80000000 | 4,    3,    5,
@@ -401,6 +428,7 @@ static const uint qt_meta_data_ShowWorker[] = {
     QMetaType::Void, 0x80000000 | 12, 0x80000000 | 13, 0x80000000 | 13,    5,   14,   15,
     QMetaType::Void, QMetaType::QString, QMetaType::QString, 0x80000000 | 19,   17,   18,    2,
     QMetaType::Void, QMetaType::Int,   21,
+    QMetaType::Void, QMetaType::Int, 0x80000000 | 23, 0x80000000 | 23, 0x80000000 | 23, 0x80000000 | 24,    2,    2,    2,    2,    2,
 
  // slots: parameters
     QMetaType::Void,
@@ -421,9 +449,10 @@ void ShowWorker::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 2: _t->showJdqData((*reinterpret_cast< QMap<QString,int>(*)>(_a[1])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[2])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[3]))); break;
         case 3: _t->showYlData((*reinterpret_cast< const QString(*)>(_a[1])),(*reinterpret_cast< const QString(*)>(_a[2])),(*reinterpret_cast< QStandardItemModel*(*)>(_a[3]))); break;
         case 4: _t->showControlRes((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 5: _t->consumer(); break;
-        case 6: _t->analyseBmqData(); break;
-        case 7: _t->analyseAllData(); break;
+        case 5: _t->showdyData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])),(*reinterpret_cast< QLabel***(*)>(_a[5]))); break;
+        case 6: _t->consumer(); break;
+        case 7: _t->analyseBmqData(); break;
+        case 8: _t->analyseAllData(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -475,6 +504,13 @@ void ShowWorker::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
                 return;
             }
         }
+        {
+            typedef void (ShowWorker::*_t)(int , QString & , QString & , QString & , QLabel * * * );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&ShowWorker::showdyData)) {
+                *result = 5;
+                return;
+            }
+        }
     }
 }
 
@@ -503,13 +539,13 @@ int ShowWorker::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 8)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 8;
+        _id -= 9;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 8)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 8;
+        _id -= 9;
     }
     return _id;
 }
@@ -547,6 +583,13 @@ void ShowWorker::showControlRes(int _t1)
 {
     void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 4, _a);
+}
+
+// SIGNAL 5
+void ShowWorker::showdyData(int _t1, QString & _t2, QString & _t3, QString & _t4, QLabel * * * _t5)
+{
+    void *_a[] = { Q_NULLPTR, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)), const_cast<void*>(reinterpret_cast<const void*>(&_t4)), const_cast<void*>(reinterpret_cast<const void*>(&_t5)) };
+    QMetaObject::activate(this, &staticMetaObject, 5, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE
