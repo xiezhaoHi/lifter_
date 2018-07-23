@@ -1,0 +1,5 @@
+ SET SQL_SAFE_UPDATES = 0; DELETE FROM TABLE_E;   SET SQL_SAFE_UPDATES = 1;  
+ 
+ 
+ //排序 取最后两条数据
+ SELECT * FROM lifter_201706.structure_stress_2017062210 order by structure_stress_time desc limit 0,1;

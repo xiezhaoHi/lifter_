@@ -1,0 +1,18 @@
+begin#3002#1002#<?xml version='1.0' encoding='utf8'?><body ID='00010001'><data_type ID='10010001'><data_speed>2</data_speed><data_levelness_x>2</data_levelness_x><data_levelness_y>1</data_levelness_y></data_type><data_type ID='10020001'><data_dir>1</data_dir><data_braking_length>1</data_braking_length><data_real_pos>1</data_real_pos><data_running_speed>2</data_running_speed></data_type></body>#end#
+begin#3002#1002#<?xml version='1.0' encoding='utf8'?><body ID='00010001'><data_type ID='10010001'><data_speed>2</data_speed><data_levelness_x>2</data_levelness_x><data_levelness_y>1</data_levelness_y></data_type><data_type ID='10020001'><data_dir>0</data_dir><data_braking_length>1</data_braking_length><data_real_pos>1</data_real_pos><data_running_speed>2</data_running_speed></data_type></body>#end#
+
+
+
+begin#3002#1002#<?xml version='1.0' encoding='utf8'?><body ID='00020001'><data_type ID='10010001'><data_speed>2</data_speed><data_levelness_x>2</data_levelness_x><data_levelness_y>1</data_levelness_y></data_type><data_type ID='10020001'><data_dir>1</data_dir><data_braking_length>1</data_braking_length><data_real_pos>1</data_real_pos><data_running_speed>2</data_running_speed></data_type></body>#end#
+begin#3002#1002#<?xml version='1.0' encoding='utf8'?><body ID='00020001'><data_type ID='10010001'><data_speed>2</data_speed><data_levelness_x>2</data_levelness_x><data_levelness_y>1</data_levelness_y></data_type><data_type ID='10020001'><data_dir>0</data_dir><data_braking_length>1</data_braking_length><data_real_pos>1</data_real_pos><data_running_speed>2</data_running_speed></data_type></body>#end#
+begin#3002#1002#<?xml version='1.0' encoding='utf8'?><body ID='00020001'><data_type ID='10010001'><data_speed>2</data_speed><data_levelness_x>2</data_levelness_x><data_levelness_y>1</data_levelness_y></data_type><data_type ID='10020001'><data_dir>0</data_dir><data_braking_length>1</data_braking_length><data_real_pos>1</data_real_pos><data_running_speed>0</data_running_speed></data_type></body>#end#
+
+
+
+begin#3002#1002#<?xml version='1.0' encoding='utf8'?><body ID='00030001'><data_type ID='10010001'><data_speed>2</data_speed><data_levelness_x>2</data_levelness_x><data_levelness_y>1</data_levelness_y></data_type><data_type ID='10020001'><data_dir>1</data_dir><data_braking_length>1</data_braking_length><data_real_pos>1</data_real_pos><data_running_speed>2</data_running_speed></data_type></body>#end#
+begin#3002#1002#<?xml version='1.0' encoding='utf8'?><body ID='00030001'><data_type ID='10010001'><data_speed>2</data_speed><data_levelness_x>2</data_levelness_x><data_levelness_y>1</data_levelness_y></data_type><data_type ID='10020001'><data_dir>0</data_dir><data_braking_length>1</data_braking_length><data_real_pos>1</data_real_pos><data_running_speed>2</data_running_speed></data_type></body>#end#
+
+
+
+begin#3002#1002#<?xml version='1.0' encoding='utf8'?><body ID='00030002'><data_type ID='10010001'><data_speed>2</data_speed><data_levelness_x>2</data_levelness_x><data_levelness_y>1</data_levelness_y></data_type><data_type ID='10020001'><data_dir>1</data_dir><data_braking_length>1</data_braking_length><data_real_pos>1</data_real_pos><data_running_speed>2</data_running_speed></data_type></body>#end#
+begin#3002#1002#<?xml version='1.0' encoding='utf8'?><body ID='00030002'><data_type ID='10010001'><data_speed>2</data_speed><data_levelness_x>2</data_levelness_x><data_levelness_y>1</data_levelness_y></data_type><data_type ID='10020001'><data_dir>0</data_dir><data_braking_length>1</data_braking_length><data_real_pos>1</data_real_pos><data_running_speed>2</data_running_speed></data_type></body>#end#
