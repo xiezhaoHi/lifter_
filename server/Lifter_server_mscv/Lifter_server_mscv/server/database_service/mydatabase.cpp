@@ -91,7 +91,7 @@ void  MyDatabase::Start()
  */
    bool MyDatabase::TableExists(QString const& strDBName,QString const& strTableName)
    {
-       QString strSql = QString("select * from '%1'.'%2'").arg(strDBName).arg(strTableName);
+	   QString strSql = QString("select * from %1.%2;").arg(strDBName).arg(strTableName);
        if(strSql.isEmpty())
            return false;
        QSqlDatabase db =  ConnectionPool::openConnection();

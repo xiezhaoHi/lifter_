@@ -9,10 +9,18 @@
 #define  USEUDP //使用UDP模式
 
 //获取编码器 角度 转速
+//暂时不用
 static char buffbmq_1[] ={(char)0x01 ,(char)0x03 ,(char)0x00  ,(char)0x78  ,(char)0x00  ,(char)0x04  ,(char)0xC4  ,(char)0x10};
 
+//暂时不用
 //获取编码器 计数值
 static char buffbmq_2[] ={(char)0x01 ,(char)0x04 ,(char)0x00  ,(char)0x40  ,(char)0x00  ,(char)0x02  ,(char)0x70  ,(char)0x1f};
+
+//最新使用的旋转编码器 获取 编码器数值的指令
+static char buffbmq_value[] = { (char)0x01 ,(char)0x03 ,(char)0x00  ,(char)0x00  ,(char)0x00  ,(char)0x02  ,(char)0xc4  ,(char)0x0b };
+//清零指令
+static char buffbmq_zero[] = { (char)0x01 ,(char)0x06 ,(char)0x00  ,(char)0x08  ,(char)0x00  ,(char)0x01  ,(char)0xc9  ,(char)0xc8 };
+
 
 
 //继电器 获取当前 开关量
@@ -514,7 +522,7 @@ bool   JdqControlThread::sendJdqData(SOCKET & clientsocket)
 
             }
 
-            ::Sleep(50);
+				::Sleep(Collect_jdq_interval);
 
                memcpy(msg.buff,buffjdq,device_jdq_data_len);
                msg.len = device_jdq_data_len;
@@ -895,6 +903,7 @@ BmqControlThread::BmqControlThread(QString strIp,int iPort)
 {
     m_strIp = strIp;
     m_iPort = iPort;
+	m_strID = Config::GetInstance()->GetDeviceID(m_strIp);
 }
 
 
@@ -1078,39 +1087,70 @@ bool   BmqControlThread::sendBmqData(tcp::socket& socket_)
 }
 
 #else
-bool   BmqControlThread::sendBmqData(SOCKET &clientsocket )
+bool   BmqControlThread::sendBmqData(SOCKET &clientsocket)
 {
 
-    /*03 返回方向 角度 转速
-     *04 返回计数值
-     */
+	
     char* buff = NULL;
     int  dataLen = 0;
-    if(BusinessSession::GetInstance()->getBmqFirst(m_strIp)) //表示读取第一条指令
-    {
-        buff = buffbmq_1;
-        dataLen = BMQPACKAGE_ONESIZE;
-    }
-    else
-    {
-        buff = buffbmq_2;
-        dataLen = BMQPACKAGE_TWOSIZE;
-    }
-
     const int buffReadLen = 256;
     int retlen = -1;
     char buffRead[buffReadLen] = {0};
     QString str;
+	//获取编码器的值
+	buff = buffbmq_value;
+	dataLen = BMQBUFF_SIZE;
 
-   retlen=  send(clientsocket, buff, BMQPACKAGE_SENDSIZE, 0);
+	if (!UserBuffer::GetInstance()->IsEmptySendList(m_strID) && !m_strID.isEmpty())
+	{
+		SendData& data = UserBuffer::GetInstance()->FrontSendList(m_strID);
+
+		retlen = send(clientsocket, data.buff, data.len, 0);
+
+		if (retlen == data.len)
+			UserBuffer::GetInstance()->PopFrontSendList(m_strID);
+		else
+		{
+			qDebug() << QString("编码器采集write错误[ip:%1]").arg(m_strIp);
+			return false;
+		}
+		// QTime t1;
+		// t1.start();
+		retlen = recv(clientsocket, buffRead, buffReadLen, 0);
+		//qDebug() << QString("jdq1_%1").arg(t1.elapsed());
+		if (retlen > 0)
+		{
+			BusinessSession::GetInstance()->InterfaceFun(
+				m_strIp, buffRead, retlen);
+		}
+		else
+		{
+			qDebug() << QString("编码器采集read错误[ip:%1]").arg(m_strIp);
+			return false;
+		}
+	}
+	Sleep(Collect_bmq_interval);
+  
+// 	if (BusinessSession::GetInstance()->getBmqFirst(m_strIp)) //表示读取第一条指令
+// 	{
+// 		buff = buffbmq_1;
+// 		dataLen = BMQPACKAGE_ONESIZE;
+// 	}
+// 	else
+// 	{
+// 		buff = buffbmq_2;
+// 		dataLen = BMQPACKAGE_TWOSIZE;
+// 	}
+	
+	retlen=  send(clientsocket, buff, BMQPACKAGE_SENDSIZE, 0);
 
    if(retlen == BMQPACKAGE_SENDSIZE)
    {
-	  // QTime t1;
+	   // QTime t1;
 	   //t1.start();
        retlen = recv(clientsocket, buffRead, buffReadLen, 0);
 	   //qDebug() << QString("bmq_%1").arg(t1.elapsed());
-       if(retlen == dataLen )
+       if(retlen == BMQBUFF_SIZE)
        {
           QString strRet = BusinessSession::GetInstance()->InterfaceFun(
                      m_strIp,buffRead,retlen);
@@ -1119,7 +1159,7 @@ bool   BmqControlThread::sendBmqData(SOCKET &clientsocket )
    }
    else
    {
-       qDebug() << QString("继电器采集write错误_err:%1").arg(GetLastError()) ;
+       qDebug() << QString("编码器采集write错误_err:%2,[ip:%1]").arg(m_strIp) .arg(GetLastError()) ;
       return false;
    }
    return false;
@@ -1250,7 +1290,7 @@ bool   DydlControlThread::sendDydlData(SOCKET & clientsocket)
 			UserBuffer::GetInstance()->PopFrontSendList(m_strID);
 		else
 		{
-			qDebug() << QString("电源设备write错误");
+			qDebug() << QString("电源设备write错误[ip:%1]").arg(m_strIp);
 			return false;
 		}
 		retlen = recv(clientsocket, buffRead, buffReadLen, 0);
@@ -1263,7 +1303,7 @@ bool   DydlControlThread::sendDydlData(SOCKET & clientsocket)
 		}
 		else
 		{
-			qDebug() << QString("电源设备采集read错误");
+			qDebug() << QString("电源设备采集read错误[ip:%1]").arg(m_strIp);
 			return false;
 		}
 
@@ -1280,7 +1320,7 @@ bool   DydlControlThread::sendDydlData(SOCKET & clientsocket)
 
 		if (retlen != msg.len)
 		{
-			qDebug() << QString("电源采集write错误");
+			qDebug() << QString("电源采集write错误[ip:%1]").arg(m_strIp);
 			return false;
 		}
 
@@ -1303,7 +1343,7 @@ bool   DydlControlThread::sendDydlData(SOCKET & clientsocket)
 		}
 		else
 		{
-			qDebug() << QString("继电器采集read错误");
+			qDebug() << QString("继电器采集read错误[ip:%1]").arg(m_strIp);
 			return false;
 		}
 
@@ -1317,7 +1357,7 @@ bool   DydlControlThread::sendDydlData(SOCKET & clientsocket)
 
 		if (retlen != msg.len)
 		{
-			qDebug() << QString("电源采集write错误");
+			qDebug() << QString("电源采集write错误[ip:%1]").arg(m_strIp);
 			return false;
 		}
 
@@ -1340,7 +1380,7 @@ bool   DydlControlThread::sendDydlData(SOCKET & clientsocket)
 		}
 		else
 		{
-			qDebug() << QString("继电器采集read错误");
+			qDebug() << QString("继电器采集read错误[ip:%1]").arg(m_strIp);
 			return false;
 		}
 	}
@@ -1353,7 +1393,7 @@ bool   DydlControlThread::sendDydlData(SOCKET & clientsocket)
 
 		if (retlen != msg.len)
 		{
-			qDebug() << QString("电源采集write错误");
+			qDebug() << QString("电源采集write错误[ip:%1]").arg(m_strIp);
 			return false;
 		}
 
@@ -1376,7 +1416,7 @@ bool   DydlControlThread::sendDydlData(SOCKET & clientsocket)
 		}
 		else
 		{
-			qDebug() << QString("电源采集read错误");
+			qDebug() << QString("电源采集read错误[ip:%1]").arg(m_strIp);
 			return false;
 		}
 	}

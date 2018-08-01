@@ -268,7 +268,6 @@ bool Mysession::sendNewestData()
        list = UserBuffer::GetInstance()->ReadDeviceToClientMap(strBelongs);
     }
 
-
     for(int index = 0; index < list.size(); ++index)
     {
         QByteArray ba = list[index].toLatin1();

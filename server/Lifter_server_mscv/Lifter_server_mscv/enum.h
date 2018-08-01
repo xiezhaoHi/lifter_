@@ -58,7 +58,7 @@ enum device_name_config
     device_can, //CAN模块设备
     device_dydl, //电压电流
     device_gss, //钢丝绳
-    device_max
+    device_max 
 };
 
 /*
@@ -81,7 +81,7 @@ enum device_data_len
 
 #define MAX_LEN 64 //传感器中间缓冲区大小
 #define PACKAGE_SIZE 11 // 数据包长度
-#define  BMQBUFF_SIZE  22 //编码器buff size
+#define  BMQBUFF_SIZE  9 //编码器返回数据 buff size 
 #define  BMQPACKAGE_ONESIZE   13 //编码器 03 指令反悔数据包大小为 13   方向 角度 转速
 #define  BMQPACKAGE_TWOSIZE  9 //编码器 04指令返回数据包大小为 9   计数值
 #define  BMQPACKAGE_SENDSIZE 8 //编码器 发送的指令长度
@@ -255,12 +255,13 @@ enum CANMODULE
  */
 enum PCClientPkg
 {
-    PCClientPkg_Jdq = 4001, //数据包为继电器 控制
+    PCClientPkg_Jdq_DO = 4001, //数据包为继电器 控制
     PCClientPkg_Lxzy, //连续作业 实验 数据包
     PCClientPkg_Dhxz, //动画选择
     PCClientPkg_Config, //配置数据包
     PCClientPkg_CAN_CONTROL = 4006,
-	PCClientPkg_onlineStatus  //客户端在线状态 0 离线 1上线  2 心跳
+	PCClientPkg_onlineStatus,  //客户端在线状态 0 离线 1上线  2 心跳
+	PCClientPkg_Jdq_DO_Statue = 4009 //读模块当前继电器状态
 };
 
 /*
@@ -283,5 +284,16 @@ enum   BmqJsz
  */
 #define CONFIG_DHXZ       "50010001"  //动画选择配置 ID
 
+/*
+编码器中 过滤脏数据
+*/
+#define BMQ_DIRTY_DATA  0x18000
+
+/*
+* 各设备 采集 间隔时间设定
+*/
+//采集 设备 间隔 毫秒(ms)
+#define  Collect_jdq_interval  50   //ms
+#define  Collect_bmq_interval  50	//ms
 
 #endif // ENUM_H

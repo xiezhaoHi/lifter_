@@ -140,10 +140,10 @@ void    UserBuffer::InitDBSqlBuff(int flag,QString const& strDBName,QString cons
                                                    (`encoder_id`,\
                                                    `encoder_date`,\
                                                    `encoder_time`,\
-                                                   `encoder_dir`,\
-                                                   `encoder_jd`,\
-                                                   `encoder_zs`,\
-                                                   `encoder_jsz`)\
+													`encoder_dir`,\
+													`encoder_jd`,\
+													`encoder_zs`,\
+													`encoder_jsz`)\
                                                    VALUES \
                                                    ").arg(strDBName).arg(strTableName);
 

@@ -122,7 +122,8 @@ private:
      */
     QString m_strIp;
     int m_iPort;
-
+	//…Ë±∏ID Ù–‘
+	QString m_strID;
 
 volatile  bool    m_stop;
 

@@ -18,8 +18,12 @@ typedef struct struct_ip_port
 //编码器 配置项
 typedef struct struct_bmq_config
 {
+	//旧编码器
     double m_d; //半径
     double m_p; //刻度
+
+	//新编码器
+	double m_pLen; //每个刻度的长度
 }BMQCOf;
 
 

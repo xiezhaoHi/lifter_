@@ -329,6 +329,9 @@ bool Config::InitDeviceConfig()
              child = firstRoot.firstChildElement("p");
              if(!child.isNull())
                    data.m_p = child.text().toDouble();
+			 child = firstRoot.firstChildElement("pLength");
+			 if (!child.isNull())
+				 data.m_pLen = child.text().toDouble();
             m_bmqID_to_config[strRootID] = data;
          }
 

@@ -176,6 +176,7 @@ public:
 		{
 			return m_lifterID;
 		}
+		return "";
 	}
 
     boost::mutex    mutex_msg;

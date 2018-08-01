@@ -50,6 +50,7 @@ BusinessSession::BusinessSession()
 
    //大小端记录 true为大端
    m_bigFlag = !checkCpu();
+   qDebug() << QString("该电脑大小端为:[%1]").arg(m_bigFlag ? "大端" : "小端");
 }
  BusinessSession::~BusinessSession()
  {
@@ -124,11 +125,10 @@ BusinessSession::BusinessSession()
    case device_cgq: //传感器 数据
 	   t.start();
        strTemp =  DealCgqData(strIp,data,len);
-	    qDebug() << QStringLiteral("cgq3_%1").arg(t.elapsed());
+	  //  qDebug() << QStringLiteral("cgq3_%1").arg(t.elapsed());
        break;
    case device_bmq: //编码器数据
        strTemp = DealBmqData(strIp,strID,data,len);
-	  
        break;
    case device_jdq: //继电器
       strTemp =  DealJdqData(strIp,data,len);
@@ -327,7 +327,8 @@ QString BusinessSession::DealBmqData(QString const& strIp,QString const& strID,c
      * 如果是编码器 设置命令的先后顺序
      */
 
-
+//旧编码器 IPAM7404
+#ifdef OLDBMQ
 
     //1.把两条数据组成一包数据
         if(0x03 == (0xff&data[1]) && BMQPACKAGE_ONESIZE == len) //表示第一条指令值返回了，再读取第二条指令的值
@@ -345,7 +346,6 @@ QString BusinessSession::DealBmqData(QString const& strIp,QString const& strID,c
 
         }
 
-   //2.crc16 校验
 
         if(getBmqDataLen(strIp) != BMQBUFF_SIZE)
         {
@@ -364,6 +364,8 @@ QString BusinessSession::DealBmqData(QString const& strIp,QString const& strID,c
 
         return "";
     }
+//2.crc16 校验
+
     int dataLen = getBmqDataLen(strIp);
    unsigned short mycrcJym =  usMBCRC16((unsigned char*)data,len-2) ;
    unsigned short mycrcJym2 = usMBCRC16((unsigned char*)m_bmqBuff,dataLen-2-len);
@@ -474,8 +476,135 @@ QString BusinessSession::DealBmqData(QString const& strIp,QString const& strID,c
 	}
     setBmqMapBuff(strIp,0,BMQBUFF_SIZE);
     setBmqFirst(strIp, true);
+#endif
+	QByteArray ary(data, len);
+	QString strTemp = ary.toHex().toStdString().c_str();
+	//新 编码器 
+	//默认是 小端 低字节在前面
+	unsigned short mycrcJym = usMBCRC16((unsigned char*)data, len - 2);
+	
+	//数据 实际 为大端 (高字节 在前)
+	unsigned short dataJym = (unsigned short)(data[len - 1] << 8) | (0xff & data[len - 2]);
+	if (mycrcJym == dataJym) //数据校验通过
+	{
+		union bmqDataUn
+		{
+			int data;
+			char buff[4];
+		};
+		bmqDataUn bmqData;
+		//大端 高字节 在 低地址
+		//编码器值
+		//			从高到低
+		//01 03 04 【00 00 1F 80】 F3 A3
+		if (m_bigFlag)
+		{
+			int indexOne = 0, indexTwo = 3;
+			bmqData.buff[indexOne]		= data[indexTwo];
+			bmqData.buff[indexOne + 1]	= data[indexTwo + 1];
+			bmqData.buff[indexOne + 2]	= data[indexTwo + 2];
+			bmqData.buff[indexOne + 3]	= data[indexTwo + 3];
+
+		}
+		else
+		{
+			int indexOne = 0, indexTwo = 6;
+			bmqData.buff[indexOne] = data[indexTwo];
+			bmqData.buff[indexOne + 1] = data[indexTwo - 1];
+			bmqData.buff[indexOne + 2] = data[indexTwo - 2];
+			bmqData.buff[indexOne + 3] = data[indexTwo - 3];
+// 			QByteArray ary1(data + 3, 4);
+// 			QString str1 = ary1.toHex().toStdString().c_str();
+// 			QByteArray ary2(bmqData.buff, 4);
+// 			QString str2 = ary2.toHex().toStdString().c_str();
+// 			return strRet;
+		}
+
+		QDateTime current_date_time = QDateTime::currentDateTime();
+		QString strDate = current_date_time.toString("yyyy/MM/dd");
+		QString current_time = current_date_time.toString("hh:mm:ss.zzz");
+		int  dirFlag = -1;// 默认没启动 0 反向(下降)、 1 正向(上升)
+
+		//配置信息
+		BMQCOf data = Config::GetInstance()->GetBmqConfig(strIp);
+
+		// 计数值
+		int jsz = bmqData.data;
+
+		//获取最新计数值
+		//编码器 在 电梯 刚启动的1秒内 有些脏数据 
+		if (jsz >= BMQ_DIRTY_DATA)
+		{
+			jsz = 0;
+		}
+		
+		int frontJsz = UserBuffer::GetInstance()->GetBmqNewestJsz(strIp);
+		
+		UserBuffer::GetInstance()->SetBmqNewestJsz(strIp, jsz);
 
 
+		//上升
+		if (frontJsz < jsz)
+		{
+			dirFlag = 1;
+		}
+		else if(frontJsz > jsz)
+		{
+			dirFlag = 0;
+		}
+
+		//计算电梯 运行的位置
+		double lifterLoc = jsz*data.m_pLen;
+
+		QString strSql = QString("('%1','%2','%3','%4','%5','%6','%7')")
+			.arg(strID)
+			.arg(strDate)
+			.arg(current_time)
+			.arg("")
+			.arg("")
+			.arg("")
+			.arg(lifterLoc)
+			;
+
+
+		UserBuffer::GetInstance()->PushDatabaseQueue(device_bmq, strSql);
+		
+		
+
+
+
+		//制动距离
+		QString strZdjl;
+
+		QString strDhData = QString("<data_type ID='%5'>\
+                                             <data_dir>%1</data_dir>\
+                                             <data_braking_length>%2</data_braking_length>\
+                                             <data_real_pos>%3</data_real_pos>\
+                                             <data_running_speed>%4</data_running_speed>\
+                                           </data_type>")
+			.arg(dirFlag)
+			.arg(strZdjl)
+			.arg(lifterLoc)
+			.arg("")
+			.arg(strID)
+			;
+		//存储 动画 客户端 数据包
+		UserBuffer::GetInstance()->WriteDeviceToDhData(strIp, strDhData);
+
+
+
+		/*
+		* 2017/6/19
+		* 增加获取到数据的时间戳 计算 速度
+		*/
+		strRet = QString("<dir>%1</dir>").arg(dirFlag)
+			+ QString("<jd>%1</jd>").arg("")
+			+ QString("<zs>%1</zs>").arg("")
+			+ QString("<jsz>%1</jsz>").arg(lifterLoc)
+			+ QString("<time>%1</time>").arg(current_date_time.toTime_t())
+			+ QString("<zdjl>%1</zdjl>").arg(strZdjl);
+
+	}
     return strRet;
 }
 
@@ -691,6 +820,67 @@ QString BusinessSession::DealJdqData(QString strIp,char* data,int len)
 {
     QString str ;
     QString strRet;
+
+	if (len > device_jdq_data_len) //当包数据大于 此值时 分包处理
+	{
+		for (int index = 0; index <= len - device_jdq_data_len - 3; index += 3) //-3 是控制命令 返回数据 0x4f4b21 的长度
+		{
+			if (data[0] == 0x4f
+				&& data[1] == 0x4b
+				&& data[2] == 0x21)
+			{
+				data = data + 3; //数据包 始指针右移3位
+			}
+		}
+	}
+
+	//0xb0 模块返回当前继电器状态数据：
+	if (0xb0 == (0xff & data[2])&&len== device_jdq_data_len)
+	{
+		unsigned char  chSum1 = 0, chSum2 = 0;// 校验1 校验2
+		for (int index = 2; index < len - 2; ++index)
+		{
+			chSum1 += 0xff & data[index];
+		}
+		chSum2 = chSum1 + chSum1;
+		unsigned char t1 = 0xff & data[len - 2];
+		unsigned char t2 = 0xff & data[len - 1];
+		if (chSum1 == t1 && chSum2 == t2)
+		{
+
+			short ret = (data[4] << 8) | (0xff & data[5]);
+			unsigned short uret = ret & 0xffff;
+
+			QString strConfig = Config::GetInstance()->GetDeviceConfig(Config::GetInstance()->GetDeviceID(strIp));
+
+			QDomDocument doc;
+			QString error;
+			int row = 0, column = 0;
+			if (!doc.setContent(strConfig, false, &error, &row, &column))
+				return strRet;
+			QDomElement root = doc.firstChildElement();
+			QString strRootID = root.attribute(QString("ID"));
+			root = root.firstChildElement(QString("DO_DATA"));
+			root = root.firstChildElement();
+			while (!root.isNull())
+			{
+				int numID = root.attribute(QString("ID")).toInt();
+				QString strText = root.attribute(QString("LINK"));
+				int q = qPow(2, numID - 1);
+				q = q & uret;
+				q = q >= 1 ? 1 : 0;
+				strRet += QString("<DO ID='%1' LINK='%2'>%3</DO>").arg(
+					QString("%1").arg(numID)
+					, strText
+					, QString("%1").arg(q));
+				root = root.nextSiblingElement();
+			}
+		}
+		return strRet;
+	}
+
+
+	//0xc0 读当前模块开关量状态 
     if(0xc0 != (0xff&data[2]))
     {
     for(int index = 0;index < len; ++index)
@@ -700,31 +890,20 @@ QString BusinessSession::DealJdqData(QString strIp,char* data,int len)
    return strRet;
    }
     str = "";
-    if(len >device_jdq_data_len) //当包数据大于 此值时 分包处理
-    {
-        for(int index= 0; index<=len-device_jdq_data_len-3; index+=3) //-3 是控制命令 返回数据 0x4f4b21 的长度
-        {
-            if(data[0] == 0x4f
-                    &&data[1] == 0x4b
-                    &&data[2] == 0x21)
-            {
-
-                data = data+3; //数据包 始指针右移3位
-            }
-
-        }
-
-    }
+   
     if(len < device_jdq_data_len)
     {
-        QString strData;
-        for(int index = 0; index < len; ++ index)
-         {
-           strData += QString("%1").arg(data[index]&0xFF,2,16,QLatin1Char('0'));
-         }
+		QString strData;
+		for (int index = 0; index < len; ++index)
+		{
+			strData += QString("%1").arg(data[index] & 0xFF, 2, 16, QLatin1Char('0'));
+		}
 
         return strRet;
     }
+// 	QByteArray byteAry(data, len);
+// 	QString strTestRet = byteAry.toHex().toStdString().c_str();
+// 	qDebug() << "JDQ[" << strTestRet << ']';
     unsigned char  chSum1 = 0, chSum2 = 0;// 校验1 校验2
      for(int index =2; index < len -2; ++index)
      {
@@ -756,6 +935,7 @@ QString BusinessSession::DealJdqData(QString strIp,char* data,int len)
            QString strText = root.attribute(QString("LINK"));
            int q = qPow(2,numID-1);
            q = q & uret;
+		   q = q >= 1 ? 1 : 0;
            strRet += QString("<DI ID='%1' LINK='%2'>%3</DI>").arg(
                                                             QString("%1").arg(numID)
                                                                   ,strText
@@ -963,10 +1143,10 @@ bool    BusinessSession::GetJdqControlOrder(JDQ_DEAL_DATA & dealData
     char controlBuf[] = {(char)0xcc,(char)0xdd,(char)0xa1,(char)0x01
                          ,(char)0xff,(char)0xff,(char)0x00,(char)0x00,(char)0x9e,(char)0x3c};
    
-	//点动时
+	//点动时 暂时不用
 	if (openFlag == 1)
 	{
-		controlBuf[2] = (char)0x33;
+		//controlBuf[2] = (char)0x33;
 	}
 	len = 10;
 
@@ -1052,7 +1232,7 @@ bool    BusinessSession::GetJdqControlOrder(JDQ_DEAL_DATA & dealData
 int     BusinessSession::DealClientPackg(QString strData, QString const& strClientIp
 	, QString & lifterID, QString & clientID)
 {
-    char buff[256] = {0};
+    char buff[MAX_PATH] = {0};
     int packCount = 0;
     int len = 0;
     QStringList strlist=strData.split("#");
@@ -1082,13 +1262,13 @@ int     BusinessSession::DealClientPackg(QString strData, QString const& strClie
 				ret = -1;
                 continue ;
             }
-            QString strID, strRec; //表示数据包中的设备DO值  和 数值
+            QString strID, strRec; //表示数据包中的设备DO值 ID  和 数值
             QDomElement root = doc.firstChildElement();
 
             QDomElement child,rootFirst;
             rootFirst = root;
             QString strRootID = root.attribute(QString("type")); //找类型
-            if(PCClientPkg_Jdq == strRootID.toInt()) //1.表示 继电器 控制命令
+            if(PCClientPkg_Jdq_DO == strRootID.toInt()) //1.表示 继电器 控制命令
             {
                 child = root.firstChildElement(QString("dev"));
                 if(!child.isNull())
@@ -1105,6 +1285,7 @@ int     BusinessSession::DealClientPackg(QString strData, QString const& strClie
 					strLifterID = child.text();
 				}
 				//默认开关长时间保持状态
+				//点动时 采用.暂时不用
 				int openFlag = 0; 
 				child = root.firstChildElement(QString("openFlag"));
 				if (!child.isNull())
@@ -1124,17 +1305,19 @@ int     BusinessSession::DealClientPackg(QString strData, QString const& strClie
                 //把 继电器控制命令 发送到 处理队列
                 if( 0 != buff[0] && 0 != len) //设备登入 有数据可以发送
                 {
-                        QString strID = Config::GetInstance()->GetDeviceID(strIp);
+                        QString strDeviceID = Config::GetInstance()->GetDeviceID(strIp);
                        // for( int index = 0; index < packCount; ++index)
+						int indexNum = packCount - 1;
+						//数据有效
+						if(indexNum*len<MAX_PATH)
                         {
-							int indexNum = packCount - 1;
                             SendData msg;
                             memcpy(msg.buff,buff+(indexNum*len),len);
                             msg.len = len;
-                          UserBuffer::GetInstance()->PushBackSendList(strID,msg);
-						  QByteArray ary(msg.buff, msg.len);
-						  QString strAryT = ary.toHex().toStdString().c_str();
-						  qDebug() << dealData.m_strID << ":" << strAryT;
+                          UserBuffer::GetInstance()->PushBackSendList(strDeviceID,msg);
+// 						  QByteArray ary(msg.buff, msg.len);
+// 						  QString strAryT = ary.toHex().toStdString().c_str();
+// 						  qDebug() << dealData.m_strID << ":" << strAryT;
                         }
 
                  }
@@ -1216,7 +1399,7 @@ int     BusinessSession::DealClientPackg(QString strData, QString const& strClie
             if(PCClientPkg_Config== strRootID.toInt()) //4.电梯选择,BMQ配置数据包
             {
 
-                QString strLifter,strBmqID,strConfigR,strConfigP;
+                QString strLifter,strBmqID,strConfigR,strConfigP,strConfigPLen;
                 child = rootFirst.firstChildElement(QString("lifter"));
                 if(!child.isNull())
                {
@@ -1237,7 +1420,14 @@ int     BusinessSession::DealClientPackg(QString strData, QString const& strClie
                {
                  strConfigP = child.text();
                }
-                QMap<int,QString> retMap =  Config::GetInstance()->GetDeviceIDListByLifterID(strLifter, device_bmq);
+				child = rootFirst.firstChildElement(QString("pLength"));
+				if (!child.isNull())
+				{
+					strConfigPLen = child.text();
+				}
+				
+                QMap<int,QString> retMap =  
+					Config::GetInstance()->GetDeviceIDListByLifterID(strLifter, device_bmq);
                 int responseRet = 1;
                 QString deviceID,strTemp;
                 if(retMap.contains(strBmqID.toInt()))
@@ -1248,13 +1438,12 @@ int     BusinessSession::DealClientPackg(QString strData, QString const& strClie
                                       <device_name  ID = '%1'>\
                                       <r>%2</r>\
                                       <p>%3</p>\
-                                      </device_name>").arg(deviceID).arg(strConfigR).arg(strConfigP);
+									<pLength>%4</pLength>\
+                                      </device_name>")
+						.arg(deviceID).arg(strConfigR).arg(strConfigP).arg(strConfigPLen);
                     strTemp  = QString("('%1',\"%2\");").arg(deviceID).arg(strTemp);
                     //存设备配置 表
                     UserBuffer::GetInstance()->PushDatabaseQueueAll(strTemp);
-
-
-
 
                 }
 
@@ -1278,6 +1467,8 @@ int     BusinessSession::DealClientPackg(QString strData, QString const& strClie
                   BMQCOf bmqcof;
                   bmqcof.m_d = strConfigR.toDouble();
                   bmqcof.m_p = strConfigP.toDouble();
+				  bmqcof.m_pLen = strConfigPLen.toDouble();
+
                   config.m_bmqcof = bmqcof;
                   config.m_clientIp = strClientIp;
                   config.m_deviceID = deviceID;
@@ -1351,7 +1542,33 @@ int     BusinessSession::DealClientPackg(QString strData, QString const& strClie
 				UserBuffer::GetInstance()->PushResponseQueue(strClientIp, data);
 			}
 
+			//读模块当前继电器状态
+			if (PCClientPkg_Jdq_DO_Statue == strRootID.toInt())
+			{
+				child = root.firstChildElement(QString("dev"));
+				if (!child.isNull())
+				{
+					strID = child.attribute(QString("ID"));
+				}
+				//
+				QString strLifterID;
+				child = root.firstChildElement(QString("lifter"));
+				if (!child.isNull())
+				{
+					strLifterID = child.text();
+				}
+				
+				char readBuf[] = { (char)0xcc,(char)0xdd,(char)0xb0,(char)0x01
+					,(char)0x00,(char)0x00,(char)0x0d,(char)0xbe,(char)0x7c};
 
+				QString strIp = Config::GetInstance()->GetDeviceIpByID(strLifterID, strID);
+				QString strDeviceID = Config::GetInstance()->GetDeviceID(strIp);
+				SendData msg;
+				msg.len = sizeof(readBuf) / sizeof(char);
+				memcpy(msg.buff, readBuf, msg.len);
+				
+				UserBuffer::GetInstance()->PushBackSendList(strDeviceID, msg);
+			}
         }
     }
     return ret;
