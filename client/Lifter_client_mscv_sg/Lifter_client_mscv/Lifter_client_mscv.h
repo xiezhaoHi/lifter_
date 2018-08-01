@@ -9,7 +9,7 @@
 #include<QTimer>
 #include"client_manager.h"
 #include<QStandardItemModel>
-
+#include<QDebug>
 
 /*
 传感器相关数据
@@ -52,7 +52,6 @@ enum DYDATA_DYDLPL
 	DYDATA_DYDLPL_C,  //3相电  C相
 	DYDATA_DYDLPL_max
 };
-
 
 //控制按钮 属性 和 相关联的 控件
 typedef struct BtAttribute
@@ -101,9 +100,19 @@ signals:
 	void show_button_zdy();
 };
 
+//编码器数据
+typedef struct BmqDataS
+{
+	QString	m_strDir; //运行方向
+	double	m_iSd;  //速度
+	double	m_iWz;  //位置-编码器计数值
+	double	m_zdjl; //制动距离
+}BmqDataS;
+
 #define MAX_THREAD_POOL 5
 class QPushButton;
 class QLabel;
+
 namespace Ui {
 	class MainWindow;
 }
@@ -127,7 +136,7 @@ public:
 	/*
 	笼A
 	*/
-	QMap<QString, QLabel*> m_button_ID_to_ctl_left; //DI设备ID 映射 按钮
+	QMap<QString, QLabel*> m_label_ID_to_ctl_left; //DI设备ID 映射 按钮
 	QMap<QString, QLabel*> m_label_ID_to_aqcd_left; //DI设备DI映射 安全触点
 	QMap<int, QLabel*>  m_cgq_to_label_left; //传感器相关 label
 	QMap<int, QLabel*>  m_bmq_to_label_left; //编码器相关 label
@@ -136,10 +145,16 @@ public:
 	QLabel*		m_label_dydl_show_left[DYDATA_SHOW_max][DYDATA_DYDLPL_max];
 	QLineEdit*	m_edit_dydl_set_left[DYDATA_DYDLPL_max];
 	QPushButton* m_pButtonSet_left_set;//设置按钮
+
+	QMap<QPushButton*, QString> m_button_ID_left; //按钮 映射DO设备ID
+	QMap<QPushButton*, BtAttribute*> m_BtAttribute_left; //按钮 映射按钮的属性
+	QMap<QString, QPushButton*> m_ID_button_left; //DO设备ID 映射 按钮
+
+	BmqDataS m_dataBmq_left; //保存bmq最近的数据
 	/*
 	笼B
 	*/
-	QMap<QString, QLabel*> m_button_ID_to_ctl_right; //DI设备ID 映射 按钮
+	QMap<QString, QLabel*> m_label_ID_to_ctl_right; //DI设备ID 映射 按钮
 	QMap<QString, QLabel*> m_label_ID_to_aqcd_right; //DI设备DI映射 安全触点
 	QMap<int, QLabel*>  m_cgq_to_label_right; //传感器相关 label
 	QMap<int, QLabel*>  m_bmq_to_label_right; //编码器相关 label
@@ -148,6 +163,11 @@ public:
 	QLabel*		m_label_dydl_show_right[DYDATA_SHOW_max][DYDATA_DYDLPL_max];
 	QLineEdit*	m_edit_dydl_set_right[DYDATA_DYDLPL_max];
 	QPushButton* m_pButtonSet_right_set;//设置按钮
+
+	QMap<QPushButton*, QString> m_button_ID_right; //按钮 映射DO设备ID
+	QMap<QPushButton*, BtAttribute*> m_BtAttribute_right; //按钮 映射按钮的属性
+	QMap<QString, QPushButton*> m_ID_button_right; //DO设备ID 映射 按钮
+	BmqDataS m_dataBmq_right; //保存bmq最近的数据													 
 private:
 	/*
 	初始化界面
@@ -155,7 +175,16 @@ private:
 	*/
 	void InitMainWnd();
 
+	/*
+	初始化开关等状态
+	*/
+	void InitWndStatues();
 
+	/*
+	禁止操作:当笼中 有工作人员操作时,禁止软件操作
+	bool:true 可以操作 false 禁止操作
+	*/
+	void OperationNot(BOOL);
 
 	/*
 	* 选择的电梯
@@ -168,11 +197,11 @@ private:
 	*/
 	TaskThread      m_taskThread;
 
-	
+
 	QStandardItemModel*     m_gss_tableV_mode;
 
-	
-	
+
+
 
 	QList<QGraphicsPixmapItem*> m_item_list;
 
@@ -183,43 +212,31 @@ private:
 	QTimer   m_timer2;
 	QTimer   m_timer_pool[MAX_THREAD_POOL];
 
-	/*
-	笼A 对应界面上 左边 显示
-	*/
-	QMap<QPushButton*, QString> m_button_ID_left; //按钮 映射DO设备ID
-	QMap<QPushButton*, BtAttribute*> m_BtAttribute_left; //按钮 映射按钮的属性
 
-	/***************************************************/
-
-	/*
-	笼B 对应界面上 右边 显示
-	*/
-	QMap<QPushButton*, QString> m_button_ID_right; //按钮 映射DO设备ID
-	QMap<QPushButton*, BtAttribute*> m_BtAttribute_right; //按钮 映射按钮的属性
-  /***************************************************/
 
 	//平层开关的状态ID 对应控制选择开关 按钮 指针
 	QMap<QString, QPushButton*> m_lifter_floor;
 
 
-   /*
-	* 保持 改变状态的button
-	*/
+	/*
+	 * 保持 改变状态的button
+	 */
 	QPushButton* m_changeState_button;
 	QTimer m_changeState_timer;
 	QTimer m_onlineStatus_timer;
+	QTimer m_jdqDOStatus_timer; //继电器DO状态  模块返回当前继电器状态数据：
 	QString m_baseTitle; //基础的标题
 
 	//点击控制button 新旧风格
-	QString m_button_state_old_style; 
+	QString m_button_state_old_style;
 	QString m_button_state_new_style;
 
 	// gray   信号灯 三种状态颜色
 	// red
 	// green
-	QString m_label_bitmap_1; 
-	QString m_label_bitmap_2; 
-	QString m_label_bitmap_3; 
+	QString m_label_bitmap_1;
+	QString m_label_bitmap_2;
+	QString m_label_bitmap_3;
 
 	//双笼 两个选择按钮
 	QAction*  m_choose_one;
@@ -240,12 +257,13 @@ private:
 	void    InitLifterList(void);
 
 	//初始化上面两个map
-	void  InitButtonIDMap(void); 
+	void  InitButtonIDMap(void);
 
-	// 做一些界面的初始化工作
-	void init(void);
-	
-
+	/*
+	新增:软件退出.做相应的清理工作.
+	1.继电器 开关 复位
+	*/
+	void ClearWork();
 
 	public slots:
 
@@ -269,107 +287,68 @@ private:
 	void ShowOnlineStatus();
 
 	/*
+	* 继电器-模块返回当前继电器状态数据
+	*/
+	void ChangeButtonStateJDQ();
+
+	/*
 	* 自定义任务处理
 	*/
 	void show_ui_button_zdy(void);
-	void get_task_result(QStringList  list, int times);
-	void show_ui_CgqData(QStringList const& strList
-		, QMap<int, QLabel*>& map);
+	void get_task_result(QStringList  , int );
+	void show_ui_CgqData(QStringList const 
+		, QMap<int, QLabel*> );
 	//编码器
-	void show_ui_BmpData(QString strDir, double iSd, double iWz, double zdjl
-		, QMap<int, QLabel*>&); //方向 速度 位置
+	void show_ui_BmpData(BmqDataS* bmqData
+		, QMap<int, QLabel*>*); //方向 速度 位置
 
 																			   //继电器
-	void show_ui_JdqData(QMap<QString, int> map
-		, QMap<QString, QLabel*>& map_id
-		, QMap<QString, QLabel*>& map_id_aqcd);
+	void show_ui_JdqData(QMap<QString, int> 
+		, QMap<QString, QLabel*>* 
+		, QMap<QString, QLabel*>* 
+		, QPushButton*);
 
+	void show_ui_JdqDataDO(QMap<QString, int> 
+		, QMap<QPushButton*,QString>* 
+	, QMap<QPushButton*, BtAttribute*>*);
+	
 	//应力
-	void    show_ui_YlData(QString const& strTd, QString const& strData, QStandardItemModel*);
+	void    show_ui_YlData(QString const , QString const , QStandardItemModel*);
 
 	//返回 操作结果 0 失败 1成功
-	void    show_ui_ControlRes(int ret);
+	void    show_ui_ControlRes(int );
 
 	//自定义 测试流程
 	void on_pushButton_zdy_clicked();
-	void on_pushButton_sz_clicked(bool checked);
 
 	//电源 数据的 显示 
-	void show_ui_dyData(int, QString &, QString&, QString&, QLabel***);
+	void show_ui_dyData(int, QString , QString, QString, QLabel***);
 	//电源 设置 电压 电流 频率
-	void on_pushButton_dySet_right(bool flag);
-	void on_pushButton_dySet_left(bool flag);
+	void on_pushButton_dySet_right(bool );
+	void on_pushButton_dySet_left(bool );
 	private slots:
 	void on_action_triggered();
 	void on_action_2_triggered();
 	void on_action_3_triggered();
 	void on_action_CAN_triggered();
 
-
-};
-//处理数据缓冲区中的数据,并更新到界面上
-/*
-* 处理服务器 数据包
-*/
-
-class ShowWorker : public QObject
-{
-
-	Q_OBJECT
-
-public:
-	ShowWorker(Lifter_client_mscv* pMainwindow)
+	//测试
+	void show_ui_test(QMap<QString, int> map
+		, QMap<QString, QLabel*> map_id
+		, QMap<QString, QLabel*> map_id_aqcd)
 	{
-		m_pMainwindow = pMainwindow;
+		qDebug() << "test";
 	}
-
-	Lifter_client_mscv* m_pMainwindow; //主ui窗口的指针
-	void start(void);
-
-
-private:
-
-
-
-public slots :
-
-		//!把数据望 缓冲区 存
-		// void producer(const QString &parameter) ;
-
-		//!从缓冲区取数据 计算 显示
-		//解析数据 并显示数据
-		void consumer();
-
-	void analyseBmqData();
-
-	/*
-	* 解析所有的数据包
-	*/
-	void analyseAllData();
-signals:
-
-	//传感器
-	void showCgqData(QStringList const& strList
-		, QMap<int, QLabel*>& map);
-
-	//编码器
-	void showBmpData(QString strDir, double iSd, double iWz, double zdjl
-		, QMap<int, QLabel*>& map); //方向 速度 位置 制动距离
-
-																		   //继电器
-	void showJdqData(QMap<QString, int> map
-		, QMap<QString, QLabel*>& map_id
-		, QMap<QString, QLabel*>& map_id_aqcd);
-
-	//应力
-	void    showYlData(QString const& strTd, QString const& strData, QStandardItemModel*);
-
-	//返回 操作结果 0 失败 1成功
-	void    showControlRes(int ret);
-
-	//电源 数据显示
-	void showdyData(int, QString &, QString&, QString&, QLabel***);
-	
+	void show_ui_test2(QMap<QString, QLabel*>* map_id_aqcd)
+	{
+		qDebug() << "test2";
+	}
+	void show_ui_test3(QMap<QString, int> map)
+	{
+		qDebug() << "test3";
+	}
+	void show_ui_test4()
+	{
+		qDebug() << "test4";
+	}
 };
-
-

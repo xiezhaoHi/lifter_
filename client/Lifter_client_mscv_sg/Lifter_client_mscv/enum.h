@@ -2,7 +2,10 @@
 #define ENUM_H
 #include<QString>
 //包含一些公共数据
+#if _MSC_VER >= 1600
+#pragma execution_character_set("utf-8")
 
+#endif
 //发送到 服务器 成功 与 否 
 enum SEND_FLAG
 {
@@ -47,11 +50,16 @@ enum enum_detection
 #define device_begin_ID 1000
 enum device_name_config
 {
-    device_cgq = 1000, //传感器设备
-    device_bmq = 1001, //编码器
-    device_jdq , //继电器
-    device_max =3
+	device_cgq = 1001, //传感器设备
+	device_bmq = 1002, //编码器
+	device_jdq, //继电器
+	device_can, //CAN模块设备
+	device_dydl, //电压电流
+	device_gss, //钢丝绳
+	device_server_res = 4005,
+	device_max = 6
 };
+
 /*设备对应的数据帧长度*/
 enum device_data_len
 {
@@ -190,6 +198,17 @@ enum client_msg
 	client_msg_max
 };
 
+/*
+电梯运行方向
+*/
+enum lifter_dir
+{
+	lifter_dir_stop = -1,
+	lifter_dir_down ,
+	lifter_dir_up
+
+};
+
 
 /*
 开关状态
@@ -216,6 +235,12 @@ enum JDQ_DO_open_flag
 #define  JDQ_DO_set_flag  "4001"
 
 /*
+继电器 模块返回当前继电器状态数据
+*/
+#define  JDQ_DO_get_flag  "4009"
+
+
+/*
 对于继电器开关的定义标志
 */
 
@@ -228,6 +253,18 @@ enum JDQ_DO_open_flag
 #define JDQ_DO_flag_renLSB		"20020016"	//人脸识别
 #define JDQ_DO_flag_yaoS		"20020017"	//钥匙
 #define JDQ_DO_flag_jiaS		"20020018"	//加速
+
+
+#define JDQ_DI_flag_shangX		"20010001"	//上行
+#define JDQ_DI_flag_xiaX		"20010002"	//下行
+#define JDQ_DI_flag_jiT			"20010006"	//急停
+#define JDQ_DI_flag_qiD			"20010007"	//电铃 / 启动
+#define JDQ_DI_flag_shangXW		"20010008"	//上限位
+#define JDQ_DI_flag_xiaXW		"20010009"	//下限位
+#define JDQ_DI_flag_xianS		"20010010"	//限速器
+#define JDQ_DI_flag_jinKM		"20010011"	//进口门
+#define JDQ_DI_flag_tianCm		"20010012"	//天窗门
+#define JDQ_DI_flag_chuKm		"20010013"	//出口门
 
 
 #endif // ENUM_H

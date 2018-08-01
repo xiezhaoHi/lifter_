@@ -148,6 +148,15 @@
     <ClCompile Include="SingleApplication.cpp">
       <Filter>Source Files\singleAPP</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_QtShowWork.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_QtShowWork.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="QtShowWork.cpp">
+      <Filter>Source Files\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Lifter_client_mscv.h">
@@ -227,6 +236,9 @@
     </CustomBuild>
     <CustomBuild Include="GeneratedFiles\ui_Lifter_client_mscv.h">
       <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="QtShowWork.h">
+      <Filter>Source Files\source</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
