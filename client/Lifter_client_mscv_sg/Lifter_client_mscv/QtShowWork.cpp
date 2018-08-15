@@ -119,7 +119,7 @@ void QtShowWork::analyseAllData()
 					if (!child.isNull())
 						strList.append(child.text());
 
-					emit showCgqData(strList, *map_cgq);
+					emit showCgqData(strList, map_cgq);
 				}
 			}
 			if (device_jdq == typeFlag) //继电器
@@ -191,7 +191,7 @@ void QtShowWork::analyseAllData()
 				{
 
 					dZs = root.text().toDouble();
-					dZs = dZs*gSizeR * 2 * 3.14 / 60.0;
+					
 				}
 				root = rootFist.firstChildElement(QString("jsz")); //找jsz子节点 计数值
 				if (!root.isNull())
@@ -208,6 +208,8 @@ void QtShowWork::analyseAllData()
 				
 				pDataBmq->m_iWz = dWz;
 				pDataBmq->m_strDir = strDir;
+				pDataBmq->m_iSd = dZs;
+				pDataBmq->m_zdjl = dZdjl;
 				emit showBmpData(pDataBmq, map_bmq);
 				emit showTest4();
 			}

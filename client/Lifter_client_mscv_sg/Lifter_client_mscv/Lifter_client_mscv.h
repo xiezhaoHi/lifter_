@@ -1,8 +1,9 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
-#include "ui_Lifter_client_mscv.h"
 
+#include <QTableView>
+#include <QLineEdit>
 #include<QList>
 #include<QGraphicsPixmapItem>
 #include<QThread>
@@ -10,7 +11,8 @@
 #include"client_manager.h"
 #include<QStandardItemModel>
 #include<QDebug>
-
+#include <QPushButton>
+//#include "ui_Lifter_client_mscv.h"
 /*
 传感器相关数据
 */
@@ -56,7 +58,7 @@ enum DYDATA_DYDLPL
 //控制按钮 属性 和 相关联的 控件
 typedef struct BtAttribute
 {
-	bool  m_flag; //启动与否的标志 
+	bool  m_flag; //启动与否的标志 0 打开  1 闭合
 	QString  m_strName; //按钮的名字
 	QPushButton* m_bt_renLSB;//人脸识别 开关
 	QPushButton* m_bt_yaoS; //钥匙开关
@@ -116,6 +118,7 @@ class QLabel;
 namespace Ui {
 	class MainWindow;
 }
+class beginRenwu;
 class Lifter_client_mscv : public QMainWindow
 {
 	Q_OBJECT
@@ -167,7 +170,13 @@ public:
 	QMap<QPushButton*, QString> m_button_ID_right; //按钮 映射DO设备ID
 	QMap<QPushButton*, BtAttribute*> m_BtAttribute_right; //按钮 映射按钮的属性
 	QMap<QString, QPushButton*> m_ID_button_right; //DO设备ID 映射 按钮
-	BmqDataS m_dataBmq_right; //保存bmq最近的数据													 
+	BmqDataS m_dataBmq_right; //保存bmq最近的数据		
+
+	//新增一个获取DO状态 开关  false 不获取  true 获取
+	BOOL  m_getDOFlag;
+
+	//周期任务窗口
+	beginRenwu*  m_beginRenwu;
 private:
 	/*
 	初始化界面
@@ -297,7 +306,7 @@ private:
 	void show_ui_button_zdy(void);
 	void get_task_result(QStringList  , int );
 	void show_ui_CgqData(QStringList const 
-		, QMap<int, QLabel*> );
+		, QMap<int, QLabel*>* );
 	//编码器
 	void show_ui_BmpData(BmqDataS* bmqData
 		, QMap<int, QLabel*>*); //方向 速度 位置
@@ -331,6 +340,10 @@ private:
 	void on_action_2_triggered();
 	void on_action_3_triggered();
 	void on_action_CAN_triggered();
+
+	//周期任务
+	void on_action_zhouqiRenwu(bool flag);
+
 
 	//测试
 	void show_ui_test(QMap<QString, int> map

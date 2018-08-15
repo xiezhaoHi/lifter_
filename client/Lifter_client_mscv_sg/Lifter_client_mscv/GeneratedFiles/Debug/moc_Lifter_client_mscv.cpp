@@ -127,8 +127,8 @@ void TaskThread::show_button_zdy()
     QMetaObject::activate(this, &staticMetaObject, 0, Q_NULLPTR);
 }
 struct qt_meta_stringdata_Lifter_client_mscv_t {
-    QByteArrayData data[47];
-    char stringdata0[744];
+    QByteArrayData data[48];
+    char stringdata0[753];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -152,38 +152,39 @@ QT_MOC_LITERAL(11, 108, 20), // "ChangeButtonStateJDQ"
 QT_MOC_LITERAL(12, 129, 18), // "show_ui_button_zdy"
 QT_MOC_LITERAL(13, 148, 15), // "get_task_result"
 QT_MOC_LITERAL(14, 164, 15), // "show_ui_CgqData"
-QT_MOC_LITERAL(15, 180, 17), // "QMap<int,QLabel*>"
-QT_MOC_LITERAL(16, 198, 15), // "show_ui_BmpData"
-QT_MOC_LITERAL(17, 214, 9), // "BmqDataS*"
-QT_MOC_LITERAL(18, 224, 7), // "bmqData"
-QT_MOC_LITERAL(19, 232, 18), // "QMap<int,QLabel*>*"
-QT_MOC_LITERAL(20, 251, 15), // "show_ui_JdqData"
-QT_MOC_LITERAL(21, 267, 17), // "QMap<QString,int>"
-QT_MOC_LITERAL(22, 285, 22), // "QMap<QString,QLabel*>*"
-QT_MOC_LITERAL(23, 308, 12), // "QPushButton*"
-QT_MOC_LITERAL(24, 321, 17), // "show_ui_JdqDataDO"
-QT_MOC_LITERAL(25, 339, 27), // "QMap<QPushButton*,QString>*"
-QT_MOC_LITERAL(26, 367, 32), // "QMap<QPushButton*,BtAttribute*>*"
-QT_MOC_LITERAL(27, 400, 14), // "show_ui_YlData"
-QT_MOC_LITERAL(28, 415, 19), // "QStandardItemModel*"
-QT_MOC_LITERAL(29, 435, 18), // "show_ui_ControlRes"
-QT_MOC_LITERAL(30, 454, 25), // "on_pushButton_zdy_clicked"
-QT_MOC_LITERAL(31, 480, 14), // "show_ui_dyData"
-QT_MOC_LITERAL(32, 495, 9), // "QLabel***"
-QT_MOC_LITERAL(33, 505, 25), // "on_pushButton_dySet_right"
-QT_MOC_LITERAL(34, 531, 24), // "on_pushButton_dySet_left"
-QT_MOC_LITERAL(35, 556, 19), // "on_action_triggered"
-QT_MOC_LITERAL(36, 576, 21), // "on_action_2_triggered"
-QT_MOC_LITERAL(37, 598, 21), // "on_action_3_triggered"
-QT_MOC_LITERAL(38, 620, 23), // "on_action_CAN_triggered"
-QT_MOC_LITERAL(39, 644, 12), // "show_ui_test"
-QT_MOC_LITERAL(40, 657, 3), // "map"
-QT_MOC_LITERAL(41, 661, 21), // "QMap<QString,QLabel*>"
-QT_MOC_LITERAL(42, 683, 6), // "map_id"
-QT_MOC_LITERAL(43, 690, 11), // "map_id_aqcd"
-QT_MOC_LITERAL(44, 702, 13), // "show_ui_test2"
-QT_MOC_LITERAL(45, 716, 13), // "show_ui_test3"
-QT_MOC_LITERAL(46, 730, 13) // "show_ui_test4"
+QT_MOC_LITERAL(15, 180, 18), // "QMap<int,QLabel*>*"
+QT_MOC_LITERAL(16, 199, 15), // "show_ui_BmpData"
+QT_MOC_LITERAL(17, 215, 9), // "BmqDataS*"
+QT_MOC_LITERAL(18, 225, 7), // "bmqData"
+QT_MOC_LITERAL(19, 233, 15), // "show_ui_JdqData"
+QT_MOC_LITERAL(20, 249, 17), // "QMap<QString,int>"
+QT_MOC_LITERAL(21, 267, 22), // "QMap<QString,QLabel*>*"
+QT_MOC_LITERAL(22, 290, 12), // "QPushButton*"
+QT_MOC_LITERAL(23, 303, 17), // "show_ui_JdqDataDO"
+QT_MOC_LITERAL(24, 321, 27), // "QMap<QPushButton*,QString>*"
+QT_MOC_LITERAL(25, 349, 32), // "QMap<QPushButton*,BtAttribute*>*"
+QT_MOC_LITERAL(26, 382, 14), // "show_ui_YlData"
+QT_MOC_LITERAL(27, 397, 19), // "QStandardItemModel*"
+QT_MOC_LITERAL(28, 417, 18), // "show_ui_ControlRes"
+QT_MOC_LITERAL(29, 436, 25), // "on_pushButton_zdy_clicked"
+QT_MOC_LITERAL(30, 462, 14), // "show_ui_dyData"
+QT_MOC_LITERAL(31, 477, 9), // "QLabel***"
+QT_MOC_LITERAL(32, 487, 25), // "on_pushButton_dySet_right"
+QT_MOC_LITERAL(33, 513, 24), // "on_pushButton_dySet_left"
+QT_MOC_LITERAL(34, 538, 19), // "on_action_triggered"
+QT_MOC_LITERAL(35, 558, 21), // "on_action_2_triggered"
+QT_MOC_LITERAL(36, 580, 21), // "on_action_3_triggered"
+QT_MOC_LITERAL(37, 602, 23), // "on_action_CAN_triggered"
+QT_MOC_LITERAL(38, 626, 21), // "on_action_zhouqiRenwu"
+QT_MOC_LITERAL(39, 648, 4), // "flag"
+QT_MOC_LITERAL(40, 653, 12), // "show_ui_test"
+QT_MOC_LITERAL(41, 666, 3), // "map"
+QT_MOC_LITERAL(42, 670, 21), // "QMap<QString,QLabel*>"
+QT_MOC_LITERAL(43, 692, 6), // "map_id"
+QT_MOC_LITERAL(44, 699, 11), // "map_id_aqcd"
+QT_MOC_LITERAL(45, 711, 13), // "show_ui_test2"
+QT_MOC_LITERAL(46, 725, 13), // "show_ui_test3"
+QT_MOC_LITERAL(47, 739, 13) // "show_ui_test4"
 
     },
     "Lifter_client_mscv\0SetBmqConfig\0\0d\0p\0"
@@ -191,11 +192,11 @@ QT_MOC_LITERAL(46, 730, 13) // "show_ui_test4"
     "ChangeButtonState\0ShowOnlineStatus\0"
     "ChangeButtonStateJDQ\0show_ui_button_zdy\0"
     "get_task_result\0show_ui_CgqData\0"
-    "QMap<int,QLabel*>\0show_ui_BmpData\0"
-    "BmqDataS*\0bmqData\0QMap<int,QLabel*>*\0"
-    "show_ui_JdqData\0QMap<QString,int>\0"
-    "QMap<QString,QLabel*>*\0QPushButton*\0"
-    "show_ui_JdqDataDO\0QMap<QPushButton*,QString>*\0"
+    "QMap<int,QLabel*>*\0show_ui_BmpData\0"
+    "BmqDataS*\0bmqData\0show_ui_JdqData\0"
+    "QMap<QString,int>\0QMap<QString,QLabel*>*\0"
+    "QPushButton*\0show_ui_JdqDataDO\0"
+    "QMap<QPushButton*,QString>*\0"
     "QMap<QPushButton*,BtAttribute*>*\0"
     "show_ui_YlData\0QStandardItemModel*\0"
     "show_ui_ControlRes\0on_pushButton_zdy_clicked\0"
@@ -203,10 +204,10 @@ QT_MOC_LITERAL(46, 730, 13) // "show_ui_test4"
     "on_pushButton_dySet_right\0"
     "on_pushButton_dySet_left\0on_action_triggered\0"
     "on_action_2_triggered\0on_action_3_triggered\0"
-    "on_action_CAN_triggered\0show_ui_test\0"
-    "map\0QMap<QString,QLabel*>\0map_id\0"
-    "map_id_aqcd\0show_ui_test2\0show_ui_test3\0"
-    "show_ui_test4"
+    "on_action_CAN_triggered\0on_action_zhouqiRenwu\0"
+    "flag\0show_ui_test\0map\0QMap<QString,QLabel*>\0"
+    "map_id\0map_id_aqcd\0show_ui_test2\0"
+    "show_ui_test3\0show_ui_test4"
 };
 #undef QT_MOC_LITERAL
 
@@ -216,7 +217,7 @@ static const uint qt_meta_data_Lifter_client_mscv[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      25,   14, // methods
+      26,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -224,31 +225,32 @@ static const uint qt_meta_data_Lifter_client_mscv[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    4,  139,    2, 0x0a /* Public */,
-       7,    1,  148,    2, 0x0a /* Public */,
-       9,    0,  151,    2, 0x0a /* Public */,
-      10,    0,  152,    2, 0x0a /* Public */,
-      11,    0,  153,    2, 0x0a /* Public */,
-      12,    0,  154,    2, 0x0a /* Public */,
-      13,    2,  155,    2, 0x0a /* Public */,
-      14,    2,  160,    2, 0x0a /* Public */,
-      16,    2,  165,    2, 0x0a /* Public */,
-      20,    4,  170,    2, 0x0a /* Public */,
-      24,    3,  179,    2, 0x0a /* Public */,
-      27,    3,  186,    2, 0x0a /* Public */,
-      29,    1,  193,    2, 0x0a /* Public */,
-      30,    0,  196,    2, 0x0a /* Public */,
-      31,    5,  197,    2, 0x0a /* Public */,
-      33,    1,  208,    2, 0x0a /* Public */,
-      34,    1,  211,    2, 0x0a /* Public */,
-      35,    0,  214,    2, 0x08 /* Private */,
-      36,    0,  215,    2, 0x08 /* Private */,
-      37,    0,  216,    2, 0x08 /* Private */,
-      38,    0,  217,    2, 0x08 /* Private */,
-      39,    3,  218,    2, 0x08 /* Private */,
-      44,    1,  225,    2, 0x08 /* Private */,
-      45,    1,  228,    2, 0x08 /* Private */,
-      46,    0,  231,    2, 0x08 /* Private */,
+       1,    4,  144,    2, 0x0a /* Public */,
+       7,    1,  153,    2, 0x0a /* Public */,
+       9,    0,  156,    2, 0x0a /* Public */,
+      10,    0,  157,    2, 0x0a /* Public */,
+      11,    0,  158,    2, 0x0a /* Public */,
+      12,    0,  159,    2, 0x0a /* Public */,
+      13,    2,  160,    2, 0x0a /* Public */,
+      14,    2,  165,    2, 0x0a /* Public */,
+      16,    2,  170,    2, 0x0a /* Public */,
+      19,    4,  175,    2, 0x0a /* Public */,
+      23,    3,  184,    2, 0x0a /* Public */,
+      26,    3,  191,    2, 0x0a /* Public */,
+      28,    1,  198,    2, 0x0a /* Public */,
+      29,    0,  201,    2, 0x0a /* Public */,
+      30,    5,  202,    2, 0x0a /* Public */,
+      32,    1,  213,    2, 0x0a /* Public */,
+      33,    1,  216,    2, 0x0a /* Public */,
+      34,    0,  219,    2, 0x08 /* Private */,
+      35,    0,  220,    2, 0x08 /* Private */,
+      36,    0,  221,    2, 0x08 /* Private */,
+      37,    0,  222,    2, 0x08 /* Private */,
+      38,    1,  223,    2, 0x08 /* Private */,
+      40,    3,  226,    2, 0x08 /* Private */,
+      45,    1,  233,    2, 0x08 /* Private */,
+      46,    1,  236,    2, 0x08 /* Private */,
+      47,    0,  239,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Double, QMetaType::Double, QMetaType::QString, QMetaType::QString,    3,    4,    5,    6,
@@ -259,22 +261,23 @@ static const uint qt_meta_data_Lifter_client_mscv[] = {
     QMetaType::Void,
     QMetaType::Void, QMetaType::QStringList, QMetaType::Int,    2,    2,
     QMetaType::Void, QMetaType::QStringList, 0x80000000 | 15,    2,    2,
-    QMetaType::Void, 0x80000000 | 17, 0x80000000 | 19,   18,    2,
-    QMetaType::Void, 0x80000000 | 21, 0x80000000 | 22, 0x80000000 | 22, 0x80000000 | 23,    2,    2,    2,    2,
-    QMetaType::Void, 0x80000000 | 21, 0x80000000 | 25, 0x80000000 | 26,    2,    2,    2,
-    QMetaType::Void, QMetaType::QString, QMetaType::QString, 0x80000000 | 28,    2,    2,    2,
+    QMetaType::Void, 0x80000000 | 17, 0x80000000 | 15,   18,    2,
+    QMetaType::Void, 0x80000000 | 20, 0x80000000 | 21, 0x80000000 | 21, 0x80000000 | 22,    2,    2,    2,    2,
+    QMetaType::Void, 0x80000000 | 20, 0x80000000 | 24, 0x80000000 | 25,    2,    2,    2,
+    QMetaType::Void, QMetaType::QString, QMetaType::QString, 0x80000000 | 27,    2,    2,    2,
     QMetaType::Void, QMetaType::Int,    2,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int, QMetaType::QString, QMetaType::QString, QMetaType::QString, 0x80000000 | 32,    2,    2,    2,    2,    2,
+    QMetaType::Void, QMetaType::Int, QMetaType::QString, QMetaType::QString, QMetaType::QString, 0x80000000 | 31,    2,    2,    2,    2,    2,
     QMetaType::Void, QMetaType::Bool,    2,
     QMetaType::Void, QMetaType::Bool,    2,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 21, 0x80000000 | 41, 0x80000000 | 41,   40,   42,   43,
-    QMetaType::Void, 0x80000000 | 22,   43,
-    QMetaType::Void, 0x80000000 | 21,   40,
+    QMetaType::Void, QMetaType::Bool,   39,
+    QMetaType::Void, 0x80000000 | 20, 0x80000000 | 42, 0x80000000 | 42,   41,   43,   44,
+    QMetaType::Void, 0x80000000 | 21,   44,
+    QMetaType::Void, 0x80000000 | 20,   41,
     QMetaType::Void,
 
        0        // eod
@@ -293,7 +296,7 @@ void Lifter_client_mscv::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
         case 4: _t->ChangeButtonStateJDQ(); break;
         case 5: _t->show_ui_button_zdy(); break;
         case 6: _t->get_task_result((*reinterpret_cast< QStringList(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 7: _t->show_ui_CgqData((*reinterpret_cast< const QStringList(*)>(_a[1])),(*reinterpret_cast< QMap<int,QLabel*>(*)>(_a[2]))); break;
+        case 7: _t->show_ui_CgqData((*reinterpret_cast< const QStringList(*)>(_a[1])),(*reinterpret_cast< QMap<int,QLabel*>*(*)>(_a[2]))); break;
         case 8: _t->show_ui_BmpData((*reinterpret_cast< BmqDataS*(*)>(_a[1])),(*reinterpret_cast< QMap<int,QLabel*>*(*)>(_a[2]))); break;
         case 9: _t->show_ui_JdqData((*reinterpret_cast< QMap<QString,int>(*)>(_a[1])),(*reinterpret_cast< QMap<QString,QLabel*>*(*)>(_a[2])),(*reinterpret_cast< QMap<QString,QLabel*>*(*)>(_a[3])),(*reinterpret_cast< QPushButton*(*)>(_a[4]))); break;
         case 10: _t->show_ui_JdqDataDO((*reinterpret_cast< QMap<QString,int>(*)>(_a[1])),(*reinterpret_cast< QMap<QPushButton*,QString>*(*)>(_a[2])),(*reinterpret_cast< QMap<QPushButton*,BtAttribute*>*(*)>(_a[3]))); break;
@@ -307,10 +310,11 @@ void Lifter_client_mscv::qt_static_metacall(QObject *_o, QMetaObject::Call _c, i
         case 18: _t->on_action_2_triggered(); break;
         case 19: _t->on_action_3_triggered(); break;
         case 20: _t->on_action_CAN_triggered(); break;
-        case 21: _t->show_ui_test((*reinterpret_cast< QMap<QString,int>(*)>(_a[1])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[2])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[3]))); break;
-        case 22: _t->show_ui_test2((*reinterpret_cast< QMap<QString,QLabel*>*(*)>(_a[1]))); break;
-        case 23: _t->show_ui_test3((*reinterpret_cast< QMap<QString,int>(*)>(_a[1]))); break;
-        case 24: _t->show_ui_test4(); break;
+        case 21: _t->on_action_zhouqiRenwu((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 22: _t->show_ui_test((*reinterpret_cast< QMap<QString,int>(*)>(_a[1])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[2])),(*reinterpret_cast< QMap<QString,QLabel*>(*)>(_a[3]))); break;
+        case 23: _t->show_ui_test2((*reinterpret_cast< QMap<QString,QLabel*>*(*)>(_a[1]))); break;
+        case 24: _t->show_ui_test3((*reinterpret_cast< QMap<QString,int>(*)>(_a[1]))); break;
+        case 25: _t->show_ui_test4(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -359,13 +363,13 @@ int Lifter_client_mscv::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 25)
+        if (_id < 26)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 25;
+        _id -= 26;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 25)
+        if (_id < 26)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 25;
+        _id -= 26;
     }
     return _id;
 }

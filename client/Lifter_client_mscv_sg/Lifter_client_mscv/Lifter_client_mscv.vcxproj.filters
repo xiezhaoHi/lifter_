@@ -142,9 +142,6 @@
     <ClCompile Include="usebuffer.cpp">
       <Filter>Source Files\source</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_SingleApplication.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
     <ClCompile Include="SingleApplication.cpp">
       <Filter>Source Files\singleAPP</Filter>
     </ClCompile>
@@ -157,13 +154,25 @@
     <ClCompile Include="QtShowWork.cpp">
       <Filter>Source Files\source</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_beginRenwu.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_beginRenwu.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="beginRenwu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SingleApplication.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SingleApplication.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Lifter_client_mscv.h">
       <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Lifter_client_mscv.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Lifter_client_mscv.qrc">
       <Filter>Resource Files</Filter>
@@ -173,12 +182,6 @@
     </CustomBuild>
     <CustomBuild Include="database_service\mydatabase.h">
       <Filter>Source Files\database_service</Filter>
-    </CustomBuild>
-    <CustomBuild Include="configdialog.ui">
-      <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="custom.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="configdialog.h">
       <Filter>Source Files\source</Filter>
@@ -228,20 +231,34 @@
     <CustomBuild Include="test.qss">
       <Filter>Resource Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="GeneratedFiles\ui_configdialog.h">
-      <Filter>Generated Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="GeneratedFiles\ui_custom.h">
-      <Filter>Generated Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="GeneratedFiles\ui_Lifter_client_mscv.h">
-      <Filter>Generated Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="QtShowWork.h">
       <Filter>Source Files\source</Filter>
+    </CustomBuild>
+    <CustomBuild Include="beginRenwu.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="beginRenwu.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="configdialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="custom.ui">
+      <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Lifter_client_mscv.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GeneratedFiles\ui_beginRenwu.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_configdialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_custom.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

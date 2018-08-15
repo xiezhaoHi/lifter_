@@ -42,7 +42,7 @@ public:
 Q_SIGNALS:
 	//´«¸ÐÆ÷
 	void showCgqData(QStringList const strList
-		, QMap<int, QLabel*> map);
+		, QMap<int, QLabel*>* map);
 
 	//±àÂëÆ÷
 	void showBmpData(BmqDataS* bmqData
@@ -77,7 +77,10 @@ Q_SIGNALS:
 public:
 	void showSignal()
 	{
-
+		QStringList strList;
+		
+		emit showCgqData(strList, &(m_pMainwindow->m_cgq_to_label_left));
+		return;
 		BmqDataS data;
 		data.m_iWz = 1;
 		data.m_strDir = "2";

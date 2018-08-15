@@ -15,15 +15,21 @@
 #include<QMessageBox>
 #include<QScrollBar>
 #include<QProcess>
+#include <QGroupBox>
 #include "QtShowWork.h"
 #include"custom/custom.h"
 #include"usebuffer.h" //缓冲区类
 #include"enum.h"
 #include"configdialog.h" //配置窗口类
-
+#include <QMenu>
+#include<QAction>
 #include<QStatusBar>
+#include<QTableView>
 #include<QMutex>
-
+#include"beginRenwu.h"
+#include <QGridLayout>
+#include <QHeaderView>
+#include <QMenuBar>
 #if _MSC_VER >= 1600
 #pragma execution_character_set("utf-8")
 
@@ -53,10 +59,10 @@ void Lifter_client_mscv::closeEvent(QCloseEvent *event)
 }
 QtShowWork* worker;
 Lifter_client_mscv::Lifter_client_mscv(QWidget *parent)
-	: QMainWindow(parent), ui(new Ui::MainWindow)
+	: QMainWindow(parent), m_beginRenwu(nullptr)
 {
 	// ui->setupUi(this);
-
+	m_getDOFlag = TRUE;//默认是获取DO状态的,当返回一次后就不回去了,避免和现实操作 现实冲突
 
 	m_button_state_old_style = QString("QPushButton{background-color:rgb(101,203,211)}QPushButton:pressed{background-color:rgb(21,172,230)}");
 	m_button_state_new_style = QString("QPushButton{background-color:rgb(21,172,230)}");
@@ -169,6 +175,10 @@ Lifter_client_mscv::Lifter_client_mscv(QWidget *parent)
 	m_onlineStatus_timer.start(3000);
 
 	m_jdqDOStatus_timer.start(3000);
+
+	//默认选择动画
+	on_action_2_triggered();
+
 	//测试
  	bool retFlag = connect(worker, &QtShowWork::showTest, this, &Lifter_client_mscv::show_ui_test);
 // 	retFlag = connect(worker, &QtShowWork::showTest2, this, &Lifter_client_mscv::show_ui_test2);
@@ -205,12 +215,9 @@ Lifter_client_mscv::~Lifter_client_mscv()
 */
 void Lifter_client_mscv::on_pushButton_zdy_clicked()
 {
-	
-
 	custom m;
 	connect(&m, &custom::sendresult, this, &Lifter_client_mscv::get_task_result);
 	m.exec();
-
 }
 
 /*
@@ -253,39 +260,37 @@ void    TaskThread::run()
 }
 void Lifter_client_mscv::show_ui_button_zdy(void)
 {
-	ui->pushButton_zdy->setEnabled(true);
+	//ui->pushButton_zdy->setEnabled(true);
 }
 
 void Lifter_client_mscv::get_task_result(QStringList list, int times)
 {
-	ui->pushButton_zdy->setEnabled(false);
+	//ui->pushButton_zdy->setEnabled(false);
 	m_taskThread.m_list = list;
 	m_taskThread.m_times = times;
 	m_taskThread.start();
 }
 
-
-
 //传感器 加速度 水平度
 void Lifter_client_mscv::show_ui_CgqData(QStringList const strList
-	, QMap<int, QLabel*> map)
+	, QMap<int, QLabel*>* map)
 {
 	if (strList.size()<6)
 		return;
 	//  ui->label_jsd_x->setText(QString("%1g").arg(strList[0]));
 
 	//   ui->label_jsd_y->setText(QString("%1g").arg(strList[1]));
-	if (map.contains(cgq_jsd_y)&& nullptr != map[cgq_jsd_y])
+	if (map->contains(cgq_jsd_y)&& nullptr != (*map)[cgq_jsd_y])
 	{
-		map[cgq_jsd_y]->setText(QString("%1g").arg(strList[2]));
+		(*map)[cgq_jsd_y]->setText(QString("%1g").arg(strList[2]));
 	}
-	if (map.contains(cgq_spd_x) && nullptr != map[cgq_spd_x])
+	if ((*map).contains(cgq_spd_x) && nullptr != (*map)[cgq_spd_x])
 	{
-		map[cgq_spd_x]->setText(QString("%1度").arg(strList[3]));
+		(*map)[cgq_spd_x]->setText(QString("%1度").arg(strList[3]));
 	}
-	if (map.contains(cgq_spd_z) && nullptr != map[cgq_spd_z])
+	if ((*map).contains(cgq_spd_z) && nullptr != (*map)[cgq_spd_z])
 	{
-		map[cgq_spd_z]->setText(QString("%1度").arg(strList[4]));
+		(*map)[cgq_spd_z]->setText(QString("%1度").arg(strList[4]));
 	}
 	
 	//ui->label_spd_z->setText(strList[5]);
@@ -304,6 +309,7 @@ void Lifter_client_mscv::show_ui_BmpData(BmqDataS* bmqData, QMap<int, QLabel*>* 
 	{
 		(*map)[bmq_fx]->setText(bmqData->m_strDir);
 		(*map)[bmq_wz]->setText(QString::number(bmqData->m_iWz, 'f', 2) + "cm");
+		(*map)[bmq_sd]->setText(QString::number(bmqData->m_iSd, 'f', 2) + "cm/s");
 	}
 	
 }
@@ -423,6 +429,17 @@ void Lifter_client_mscv::show_ui_JdqDataDO(QMap<QString, int> map
 		{
 			bool flag = map[strID] == 1 ? true : false;
 			BtAttribute*& btAttri = (*mapAttri)[pTemp_left];
+
+			//如果是加速开关,并且相应的 前置 开关状态为 0 标识不是关联的 加速开关,不改变状态
+			if (btAttri->m_bt_dir != nullptr)
+			{
+				BtAttribute* btAttriDir = (*mapAttri)[btAttri->m_bt_dir];
+				if (btAttriDir != nullptr && btAttriDir->m_flag == 0)
+				{
+					continue;
+				}
+			}
+			
 			if (!flag) //当前状态:开关 打开 0
 			{
 				(pTemp_left)->setText(btAttri->m_strName);
@@ -434,9 +451,9 @@ void Lifter_client_mscv::show_ui_JdqDataDO(QMap<QString, int> map
 				btAttri->m_flag = true;
 			}
 		}
-		
-		
 	}
+	//成功获取一次后,默认不再获取开关状态
+	m_getDOFlag = FALSE;
 }
 
 //应力
@@ -659,7 +676,7 @@ bool Lifter_client_mscv::eventFilter(QObject *watched, QEvent *event)
 			//1.2.1.1 数据有效
 			if (pBtDir != nullptr && pAttriDir != nullptr)
 			{
-				//1.2.1.1.1 上、下 开关 已打开
+				//1.2.1.1.1 上、下 开关 已打开   
 				if (pAttriDir->m_flag)
 				{
 					strShowLog = "加速 前置开关 已打开,操作正常!";
@@ -781,7 +798,7 @@ bool Lifter_client_mscv::eventFilter(QObject *watched, QEvent *event)
 			.arg(openFlag)
 		);
 		bool retB = client_manager::GetInstance()->send_to_server(JDQ_DO_set_flag, strSend);
-		
+		//
 		if (retB)
 		{
 			statusBar()->showMessage("发送控制命令成功!", 3000); // 显示临时信息，时间3秒钟.
@@ -929,6 +946,12 @@ void Lifter_client_mscv::ShowOnlineStatus()
 */
 void Lifter_client_mscv::ChangeButtonStateJDQ()
 {
+	//不获取就返回
+	if (m_getDOFlag == FALSE)
+	{
+		return;
+	}
+
 	QStringList strSend;
 	strSend.append(QString("<dev ID = '%1'>1</dev><lifter>%2</lifter>")
 		.arg("20020001")
@@ -1028,7 +1051,7 @@ void    Lifter_client_mscv::InitLifterList(void)
 //选择动画
 void Lifter_client_mscv::on_action_2_triggered()
 {
-	ui->action_2->setDisabled(true);
+	//ui->action_2->setDisabled(true);
 	QStringList strSendList;
 
 	QString str = QString("<lifter>%1</lifter><choose>1</choose>").arg(m_choose_lifter);
@@ -1052,18 +1075,18 @@ void Lifter_client_mscv::on_action_2_triggered()
 		text = "设置成功";
 	else
 		text = "设置超时";
-	QMessageBox message(QMessageBox::Warning, "提示", text, QMessageBox::Ok, NULL);
-	message.exec();
+	//QMessageBox message(QMessageBox::Warning, "提示", text, QMessageBox::Ok, NULL);
+	//message.exec();
 
-	if (SEND_FLAG_SUCESS == response)
-		ui->action_3->setDisabled(false);
-	else
-		ui->action_2->setDisabled(false);
+// 	if (SEND_FLAG_SUCESS == response)
+// 		//ui->action_3->setDisabled(false);
+// 	else
+// 		//ui->action_2->setDisabled(false);
 }
 //结束投放
 void Lifter_client_mscv::on_action_3_triggered()
 {
-	ui->action_3->setDisabled(true);
+	//ui->action_3->setDisabled(true);
 	QStringList strSendList;
 
 	QString str = QString("<lifter>%1</lifter><choose>0</choose>").arg(m_choose_lifter);
@@ -1089,10 +1112,10 @@ void Lifter_client_mscv::on_action_3_triggered()
 		text = "设置超时";
 	QMessageBox message(QMessageBox::Warning, "提示", text, QMessageBox::Ok, NULL);
 	message.exec();
-	if (SEND_FLAG_SUCESS == response)
-		ui->action_2->setDisabled(false);
-	else
-		ui->action_3->setDisabled(false);
+// 	if (SEND_FLAG_SUCESS == response)
+// 		//ui->action_2->setDisabled(false);
+// 	else
+// 		//ui->action_3->setDisabled(false);
 }
 
 void Lifter_client_mscv::on_action_CAN_triggered()
@@ -1159,6 +1182,14 @@ void Lifter_client_mscv::on_action_CAN_triggered()
 	}
 }
 
+
+//周期任务
+void Lifter_client_mscv::on_action_zhouqiRenwu(bool flag)
+{
+	if (m_beginRenwu == nullptr)
+		m_beginRenwu = new beginRenwu();
+	m_beginRenwu->exec();
+}
 // 返回 操作结果 0 失败 1成功
 void    Lifter_client_mscv::show_ui_ControlRes(int ret)
 {
@@ -1333,7 +1364,7 @@ void Lifter_client_mscv::on_pushButton_dySet_left(bool flag)
 */
 void Lifter_client_mscv::InitMainWnd()
 {
-
+	
 	//左边 整体布局
 	QGridLayout* pGridLeft_right = new QGridLayout;
 	QGridLayout* pGridLeft_left = new QGridLayout;
@@ -1349,6 +1380,14 @@ void Lifter_client_mscv::InitMainWnd()
 	QGroupBox* pGbRightB = new QGroupBox();
 	pGbRightB->setTitle("  笼B  ");
 	pGbRightB->setMinimumHeight(iHeight / 2);
+
+	QMenuBar* mb = menuBar();
+	QMenu* menu = new QMenu("操作");
+	QAction* action = new QAction("周期运行", NULL);
+
+	menu->addAction(action); //将action加入菜单项中
+	QObject::connect(action, SIGNAL(triggered(bool)), this, SLOT(on_action_zhouqiRenwu(bool)));
+	mb->addMenu(menu);  //将菜单项加入MenuBar中
 /*
 左边笼A界面初始化
 */
@@ -1667,6 +1706,7 @@ void Lifter_client_mscv::InitMainWnd()
 	pTableView_left->horizontalScrollBar()->setVisible(false);
 	pTableView_left->verticalScrollBar()->setVisible(false);
 	int nWidth_left = pTableView_left->width() / 4;
+
 	for (int index = 0; index < 4; ++index)
 		pTableView_left->setColumnWidth(index, nWidth_left);
 
@@ -1686,8 +1726,8 @@ void Lifter_client_mscv::InitMainWnd()
 	/**********************************************/
 	//传感器相关数据
 	QLabel* pLabelSpdx_text_left = new QLabel("x轴水平度");
-	QLabel* pLabelSpdz_text_left = new QLabel("z轴水平度");
-	QLabel* pLabelJsdy_text_left = new QLabel("y轴加速度");
+	QLabel* pLabelSpdz_text_left = new QLabel("y轴水平度");
+	QLabel* pLabelJsdy_text_left = new QLabel("z轴加速度");
 
 
 	QLabel* pLabelSpdx_left = new QLabel();
@@ -2098,8 +2138,8 @@ void Lifter_client_mscv::InitMainWnd()
 	/**********************************************/
 	// 传感器相关 监测数据
 	QLabel* pLabelSpdx_text_right = new QLabel("x轴水平度");
-	QLabel* pLabelSpdz_text_right = new QLabel("z轴水平度");
-	QLabel* pLabelJsdy_text_right = new QLabel("y轴加速度");
+	QLabel* pLabelSpdz_text_right = new QLabel("y轴水平度");
+	QLabel* pLabelJsdy_text_right = new QLabel("z轴加速度");
 
 
 	QLabel* pLabelSpdx_right = new QLabel();
@@ -2178,7 +2218,7 @@ void Lifter_client_mscv::InitMainWnd()
 	pCenterLayout->setColumnStretch(0, 1);
 	pCenterLayout->setColumnStretch(1, 1);
 	pCenterWnd->setLayout(pCenterLayout);
-
+	setWindowState(Qt::WindowMaximized);
 }
 
 /*
