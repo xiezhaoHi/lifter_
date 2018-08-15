@@ -49,21 +49,36 @@ typedef struct  SendMessageData
     int len;
 }SendData;
 
+typedef struct lifterBmqJszCof
+{
+	//电梯每层编码器计数值 数组
+	int* m_lifterBmqJsz;
+	//数组大小
+	int  m_lifterBmqJszNum;
+}lifterBmqJszCof;
+
 /*buffer 集中管理*/
 class UserBuffer
 {
 public:
+	/**************************************************/
+	/*
+	* 电梯每层 编码器 计数值配置
+	* 电梯ID  与 计数值结构体
+	*/
+	void    WriteLifterBmqBuffer(QString const&, lifterBmqJszCof*);
+	lifterBmqJszCof* ReadLifterBmqBuffer(QString const&);
     /*
      * 回复 客户端队列 读写
      * m_response_queue
      */
-    void    PushResponseQueue(const QString &strIp, response_data const& data);
+    void    PushResponseQueue(const QString &, response_data const& );
 
     /*
-     * strIp  客户端ip
+     * strId  客户端ID
      * 返回 回复的 数据包
      */
-    QString PopResponseQueue(QString const& strIp);
+    QString PopResponseQueue(QString const& strId);
 
 
     /**************************************************/
@@ -94,12 +109,12 @@ public:
     /*
      * 设置 当前 编码器 最新的计数值
      */
-    void    SetBmqNewestJsz(QString const& strIp,int const& jsz);
+    void    SetBmqNewestJsz(QString const& ,int const& );
 
     /*
      * 获取 指定编码器 最新的计数值
      */
-    int     GetBmqNewestJsz(QString const& strIp);
+    int     GetBmqNewestJsz(QString const& );
 
 
     /*
@@ -132,7 +147,7 @@ public:
     /*
      *写入数据   m_device_to_dh_data
      */
-    void WriteDeviceToDhData(QString const& strIp, QString const& strData);
+    void WriteDeviceToDhData(QString const& , QString const& );
 
     /*
      * 读出指定 客户端 的动画 数据包
@@ -249,6 +264,11 @@ private:
 
     static UserBuffer* m_singleton;
 
+	//电梯每层的编码器计数值
+	QMap<QString, lifterBmqJszCof*>  m_lifterBmqJszCof;
+	
+
+
     /*
      * 回复 队列
      */
@@ -333,7 +353,7 @@ private:
     boost::condition          m_device_to_client_map_cond;
     boost::mutex              m_device_to_client_map_mutex;
     /*
-     *存储不同ip设备关联的数据
+     *存储不同id设备关联的数据
      */
     QMap<QString,QString>       m_device_to_data;
     /*

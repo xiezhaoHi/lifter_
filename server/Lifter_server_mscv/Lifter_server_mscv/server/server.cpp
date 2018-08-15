@@ -25,18 +25,8 @@ void Myserver::handle_accept(boost::shared_ptr<Mysession>& new_session, const bo
         int intPort = new_session->getsessionPort();
          qDebug() << QString("client:IP =") << strIp<< QString("client:port =") << intPort;
         m_connections.Add(new_session);
+		recordUserDL(strIp, QString("%1").arg(intPort));
         //记录用户登录信息
-        recordUserDL(strIp,QString("%1").arg(intPort));
-//                      if(!m_connections.Add(new_session))  /*用户登录,记录信息*/
-//                      {
-//                          //ip 未注册 过滤
-//                          new_session->socket().shutdown(tcp::socket::shutdown_both);
-//                          new_session->socket().close();
-//                          qDebug() << "该用户未注册,断开连接,过滤!";
-//                          return;
-//                       }
-
-
         new_session->start();
     }
 
@@ -104,10 +94,6 @@ void    Myserver::recordUserDL(QString const& strIp, QString const& strPort,int 
             list.append(QString("上线"));
         else
             list.append(QString("下线"));
-        if(Config::GetInstance()->GetUserInfo().contains(strIp)) //设备
-            list.append(QString("设备"));
-        if(Config::GetInstance()->GetUserInfo(1).contains(strIp)) //client 端
-            list.append(QString("client"));
         list.append(strIp);
         list.append(strPort);
 
@@ -125,7 +111,7 @@ void    Myserver::recordUserDL(QString const& strIp, QString const& strPort,int 
                     //比较设备 绑定的client端 ip是否相等
                     //if(begin.key() == Config::GetInstance()->GetClientIpByDeviceIp(strIp))
                     {
-                        QString strData = BusinessSession::GetInstance()->GetExitDevicePackg(strIp);
+                        QString strData = BusinessSession::GetInstance()->GetExitDevicePackg(strIp+strPort);
                         if(strData.isEmpty())
                             return ;
                         QString strClientIP;

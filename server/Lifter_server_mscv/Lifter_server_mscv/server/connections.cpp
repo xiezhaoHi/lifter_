@@ -9,22 +9,22 @@ bool Connections::Add(shared_ptr<Mysession> &con) {
 //    values_.insert(con);
 //   return true;
 
-
-    QString strIp = con->getsessionIp();
+	QString strID= con->getsessionID();
+   
 
     //model test
   //  m_client_map[QString("192.168.1.8")] = con;
 /************************************************/
 
-    if(Config::GetInstance()->GetUserInfo(device_or_client_device).contains(strIp)) //设备登入
+    if(Config::GetInstance()->GetUserInfo(device_or_client_device).contains(strID)) //设备登入
     {
-        m_device_map[strIp] = con;
+        m_device_map[strID] = con;
 
         return true;
     }
-    if(Config::GetInstance()->GetUserInfo(device_or_client_client).contains(strIp)) //用户登入
+    if(Config::GetInstance()->GetUserInfo(device_or_client_client).contains(strID)) //用户登入
     {
-        m_client_map[strIp] = con;
+        m_client_map[strID] = con;
 
         return true;
     }
@@ -35,14 +35,14 @@ bool Connections::Add(shared_ptr<Mysession> &con) {
 void Connections::Remove(shared_ptr<Mysession> con) {
     boost::mutex::scoped_lock lock(mtx);
 
-    QString strIP = con->getsessionIp();
+    QString strID = con->getsessionID();
 
-	Myserver::getInstance()->recordUserDL(strIP,QString("%1").arg(con->getsessionPort()),0);
+	Myserver::getInstance()->recordUserDL(con->getsessionIp(),QString("%1").arg(con->getsessionPort()),0);
 
-    if(m_device_map.contains(strIP))
-         m_device_map.remove(strIP);
-    if(m_client_map.contains(strIP))
-        m_client_map.remove(strIP);
+    if(m_device_map.contains(strID))
+         m_device_map.remove(strID);
+    if(m_client_map.contains(strID))
+        m_client_map.remove(strID);
 }
 
 void Connections::CloseAll() {

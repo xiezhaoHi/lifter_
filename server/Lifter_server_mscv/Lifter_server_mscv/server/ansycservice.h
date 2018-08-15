@@ -220,7 +220,7 @@ public:
              qDebug() << str << "\n";
 #endif
             BusinessSession::GetInstance()->InterfaceFun(
-                        getsessionIp(),data_,bytes_transferred);
+				getsessionID(),data_,bytes_transferred);
             //²âÊÔ
 //                 QString str = QString("INSERT INTO `data_test`.`monitordate` (`MonitorCode`, `MonitorName`, `MonitorType`, `MonitorDesc`, `MonitorResult`, `MonitorFromElevator`) VALUES ('1', 'jsd', '08:58:39', 'sm', '5551aaffc4ffec07f61f1a', '1');");
 //                 UserBuffer::GetInstance()->PushDatabaseQueue(str);;

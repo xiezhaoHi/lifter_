@@ -173,8 +173,8 @@ QString CCanModuleServer::GetLastError()
  {
 
     m_dataConThread[index] = new DataConnectionThread(canData);  //数据采集
-    m_analyzeSaveDB[index] = new DataAnalyzeSaveDB(canData.strIp,Config::GetInstance()->GetDeviceID(canData.strIp)); //数据存 数据库
-    m_analyzeThread[index] = new DataAnalyzeThread(canData.strIp,(m_dataConThread[index]->m_gSaveFifo_buf)); //数据解析
+    m_analyzeSaveDB[index] = new DataAnalyzeSaveDB(canData.strID,Config::GetInstance()->GetDeviceID(canData.strIp+canData.port)); //数据存 数据库
+    m_analyzeThread[index] = new DataAnalyzeThread(canData.strID,(m_dataConThread[index]->m_gSaveFifo_buf)); //数据解析
 
     //保存 获取can模块数据的 线程 指针
     m_analyzeThread[index]->m_connectThread = m_dataConThread[index];
@@ -642,7 +642,7 @@ void DataAnalyzeThread::run()
                 ch = (gSaveFifo_buf.id - START_ID) % 4;
 
                 QString strRet = QString("<?xml version='1.0' encoding ='utf8'?><body type = '1004' belongs='%3'><td ID='%1'>%2</td></body>")
-                        .arg(ch).arg(strData).arg(Config::GetInstance()->GetLifterIDByDeviceIp(m_strIp));
+                        .arg(ch).arg(strData).arg(Config::GetInstance()->GetLifterIDByDeviceId(m_strIp));
 
                 //分发
                  strRet = QString("being#%1#%2#").arg("1004").arg(strRet.length())+strRet+QString("#end#");
@@ -663,13 +663,13 @@ void DataAnalyzeThread::run()
 
         }
 
-        strDhData = QString("<data_type ID='%1'>%2</data_type>").arg(Config::GetInstance()->GetDeviceID(m_strIp)).arg(strDhData);
+        strDhData = QString("<data_type ID='%1'>%2</data_type>").arg(m_strID).arg(strDhData);
         //存储 动画 客户端 数据包
-        UserBuffer::GetInstance()->WriteDeviceToDhData(m_strIp,strDhData);
+        UserBuffer::GetInstance()->WriteDeviceToDhData(m_strID,strDhData);
         /*
          * 更新发送缓冲
          */
-        UserBuffer::GetInstance()->WriteDeviceToClientMap(m_strIp,strSendData);
+        UserBuffer::GetInstance()->WriteDeviceToClientMap(m_strID,strSendData);
 
          msleep(10);
     }
@@ -765,7 +765,7 @@ void DataAnalyzeSaveDB::run()
     strainDeviceData_T tempStrain ;
     while(m_stopFlag)
     {
-        retCanBuffLen = BusinessSession::GetInstance()->ReadCanModuleBuffer(m_strIp,canBuff,canBuffLen);
+        retCanBuffLen = BusinessSession::GetInstance()->ReadCanModuleBuffer(m_strID,canBuff,canBuffLen);
          /*
         * 插入 数据库 存储队列
         */
@@ -873,7 +873,7 @@ void DataAnalyzeSaveDB::run()
              {
 
                  if (((frameinfo[i].ID - START_ID) >= 0) && ((frameinfo[i].ID - START_ID) <= MAX_CHANNEL))
-                    BusinessSession::GetInstance()->WriteCanModuleBuffer(m_strIp,frameinfo,len);
+                    BusinessSession::GetInstance()->WriteCanModuleBuffer(m_strID,frameinfo,len);
 
                   errorCount = 0;
                  for (i = 0; i < len; i++)

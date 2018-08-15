@@ -46,7 +46,7 @@ public:
     /*
      *下线通知 客户端
      */
-    QString GetExitDevicePackg(QString const& strIp);
+    QString GetExitDevicePackg(QString const& );
 
 
     /*
@@ -61,7 +61,7 @@ public:
     *
     *
     */
-    QString  DealCgqData(const QString &strIp, char* data, int len);
+    QString  DealCgqData(const QString &, char* , int );
 
     //传感器
     QString DealCgqQuit(QString const& strIp);
@@ -78,7 +78,7 @@ public:
     //获取crc校验码
     unsigned short usMBCRC16( unsigned char * pucFrame, unsigned short usLen );
 
-    QString DealBmqData(const QString &strIp, const QString &strID, char* data, int len);
+    QString DealBmqData(const QString &strID, char* data, int len);
     //编码器
     QString DealBmqQuit(QString const& strIp);
 
@@ -136,7 +136,7 @@ public:
     *
     *
     */
-    QString DealJdqData(QString strIp,char* data,int len);
+    QString DealJdqData(QString const&,char* data,int len);
 
     //继电器
   QString DealJdqQuit(QString const& strIp);
@@ -146,7 +146,7 @@ public:
 	* 电源 电压 电流 功率 数据解析
 	* 20180620 修改: 新增 flag 标识 数据的类型
 	*/
-  QString DealDydlData(QString strIp, char* data, int len, int flag);
+  QString DealDydlData(QString const&, char* , int , int );
 
   QString DealDydlQuit(QString const& strIp);
     /**********************************************************************/
@@ -160,12 +160,12 @@ public:
     /*
      * can module 写缓存
      */
-    void    WriteCanModuleBuffer(QString const& strIp,VCI_CAN_OBJ* const& buff,int const& size);
+    void    WriteCanModuleBuffer(QString const& ,VCI_CAN_OBJ* const& ,int const& );
 
     /*
      * 读 can module 缓存
      */
-    int ReadCanModuleBuffer(QString const& strIp,VCI_CAN_OBJ* buff,int const& size);
+    int ReadCanModuleBuffer(QString const& ,VCI_CAN_OBJ* ,int const& );
      /**********************************************************************/
     /*
      * 返回错误信息
@@ -196,7 +196,7 @@ private:
 
 
     /*
-     * can 设备模块ip 映射 buffer
+     * can 设备模块id 映射 buffer
      */
     QMap<QString,CanModuleBuffer*>   m_canModule_buffer_map;
      /**********************************************************************/

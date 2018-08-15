@@ -21,7 +21,7 @@
 //标识 编号 类型 位数
 #define  USER_ID_COUNT 4
 
-#define  DISPENSE_TIMES 30 //分发间隔 30 毫秒
+#define  DISPENSE_TIMES 100 //分发-采集时间间隔为100ms
 typedef struct{
     int flag; //标识数据是什么
     QString strData;//具体的数据项
@@ -282,7 +282,9 @@ enum   BmqJsz
 /*
  * 除设备 外的配置信息
  */
-#define CONFIG_DHXZ       "50010001"  //动画选择配置 ID
+#define CONFIG_DHXZ          "5001"  //动画选择配置 ID
+//双笼电梯计数值 配置
+#define CONFIG_BMQ_JSZ       "0003"  //动画选择配置 ID
 
 /*
 编码器中 过滤脏数据
@@ -293,7 +295,10 @@ enum   BmqJsz
 * 各设备 采集 间隔时间设定
 */
 //采集 设备 间隔 毫秒(ms)
-#define  Collect_jdq_interval  50   //ms
-#define  Collect_bmq_interval  50	//ms
+#define  Collect_jdq_interval  100   //ms
+#define  Collect_bmq_interval  100	//ms
+
+//编码器波动范围
+#define  Bodong_bmq  1
 
 #endif // ENUM_H

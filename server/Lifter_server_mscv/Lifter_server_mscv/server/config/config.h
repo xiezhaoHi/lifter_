@@ -23,7 +23,7 @@ typedef struct struct_bmq_config
     double m_p; //刻度
 
 	//新编码器
-	double m_pLen; //每个刻度的长度
+	double m_pLen; //每个刻度的长度 cm
 }BMQCOf;
 
 
@@ -67,13 +67,13 @@ public:
      * 获取指定ip 编码器的配置项
      *
      */
-    BMQCOf GetBmqConfig(QString const& strIp);
+    BMQCOf GetBmqConfig(QString const& );
 
     /*
      * 制动
-     * 返回 传感器 对应的 编码器ip
+     * 返回 传感器id 对应的 编码器id
      */
-    QString GetCgqToBmqIp(QString const& strIp);
+    QString GetCgqToBmqID(QString const& strId);
 
 
     /*
@@ -114,19 +114,19 @@ public:
      * 参数为设备IP
      *
      */
-    QString     GetLifterIDByDeviceIp(QString const& strIp);
+    QString     GetLifterIDByDeviceId(QString const& strIp);
 
 
     /*
      * 获取设备 ID
      * 设备ip作为参数
      */
-    QString GetDeviceID(QString const& strIp);
+    QString GetDeviceID(QString const& );
 
     /*
      * 返回设备标识
      */
-    int GetDeviceFlag(QString const& strIp);
+	QString GetDeviceFlag(QString const& );
 
     /*
      *返回 指定设备ID的 配置信息
@@ -134,9 +134,9 @@ public:
     QString GetDeviceConfig(QString const& strID);
 
     /*
-     *指定 继电器关联设备ID 返回 继电器IP
+     *指定 继电器关联设备ID 返回 继电器ID
      */
-    QString GetDeviceIpByID(const QString &, QString const& strID);
+    QString GetDeviceIDByID(const QString &, QString const& strID);
 
     /*
      * 指定关联设备id 返回 继电器的DI 口
@@ -243,13 +243,14 @@ private:
     QStringList**    m_config_list[config_max];
     int                     m_config_list_num[config_max];
     QMap<QString, int> m_deviceID_map;  //保存 设备id 对应的 enum
-    QMap<QString,boost::shared_ptr<QStringList>> m_devcice_ipMap; //设备ip 映射 设备list
-        QMap<QString,boost::shared_ptr<QStringList>> m_clientMap_ipMap; //client ip 映射list
+    QMap<QString,boost::shared_ptr<QStringList>> m_devcice_idMap; //设备id 映射 设备list
+    QMap<QString,boost::shared_ptr<QStringList>> m_clientMap_ipMap; //client ip 映射list
 
-      QMap<QString,QString>     m_deviceID_to_ip_map; //设备表 设备ID映射到设备ip
-      QMap<QString,QString>     m_deviceIp_byID_map; //通过 继电器关联的 设备ID 返回继电器的IP
-      QMap<QString,QString>     m_deviceID_to_di_map; //设备号对应的DI号
-      QMap<QString,QString>     m_deviceID_to_do_map; //设备号对应的DO号
+	QMap<QString,QString>     m_device_IPPort_ID_map; //设备表 设备ip+port 获取设备ID
+    QMap<QString,QString>     m_deviceID_to_id_map; //设备表 设备ID映射到设备ip
+    QMap<QString,QString>     m_deviceIp_byID_map; //通过 继电器关联的 设备ID 返回继电器的IP
+    QMap<QString,QString>     m_deviceID_to_di_map; //设备号对应的DI号
+    QMap<QString,QString>     m_deviceID_to_do_map; //设备号对应的DO号
     /***********************************************************/
     //2017/6/7
 

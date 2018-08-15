@@ -96,6 +96,7 @@ void Mysession::handle_read(const boost::system::error_code& error, size_t bytes
 			//客户端登陆数据包
             if(1 == ret)
             {
+				
 				if (NULL == m_sendSessionThread)
 				{
 					m_sendIp = getsessionIp();
@@ -238,7 +239,7 @@ void Mysession::handle_write(const boost::system::error_code& error)
 bool Mysession::sendNewestData()
 {
 	//返回响应数据
-    QString strRet = UserBuffer::GetInstance()->PopResponseQueue(m_sendIp);
+    QString strRet = UserBuffer::GetInstance()->PopResponseQueue(m_clientID);
     if(!strRet.isEmpty())
     {
         boost::system::error_code ec;
@@ -293,14 +294,23 @@ bool Mysession::sendNewestData()
 //对于双笼的 还待优化
 bool Mysession::sendNewestDhData()
 {
+	//动画配置的电梯信息
+	QString strBelongs = UserBuffer::GetInstance()->ReadDhxzBuffer();
     QString strSendData;
 
-    strSendData = UserBuffer::GetInstance()->ReadDeviceToDhData(UserBuffer::GetInstance()->ReadDhxzBuffer());
+    strSendData = UserBuffer::GetInstance()->ReadDeviceToDhData(strBelongs);
     if(strSendData.isEmpty())
         return true;
-    QByteArray ba = strSendData.toLatin1();
+	QString strRet;
+	strRet += QString("<?xml version='1.0' encoding ='utf8'?>");
+	strRet += QString("<body  belongs='%2' type='%1' >").arg("3002").arg(strBelongs);
+	strRet += strSendData;
+	strRet += QString("</body>");
+	strRet = QString("being#%1#%2#").arg("3002").arg(strRet.length()) + strRet + QString("#end#");
+
+    QByteArray ba = strRet.toLatin1();
     char *dataTemp = ba.data();
-    int     sizeTemp = strSendData.length();
+    int     sizeTemp = strRet.length();
 
 
     boost::system::error_code ec;

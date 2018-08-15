@@ -87,6 +87,7 @@ private:
      * 继电器的ip 和 端口号
      */
     QString m_strIp;
+	QString m_strID;
     int m_iPort;
     char m_cgq_buff[CGQ_BUFFSIZE];
     boost::asio::ip::tcp::socket* m_psocket;

@@ -17,6 +17,7 @@
 typedef struct CANDATA_STRUCT
 {
     QString strIp;//"192.168.1.1"类似 字符串
+	QString strID;//设备ID
     int    port;
     int cannum;
     DWORD devind;
@@ -121,9 +122,9 @@ class DataConnectionThread;
 class DataAnalyzeThread:public QThread
 {
 public:
-    DataAnalyzeThread(QString const& strIp,device_buf_T* gSaveFifo_buf):m_gSaveFifo_buf(gSaveFifo_buf)
+    DataAnalyzeThread(QString const& strId,device_buf_T* gSaveFifo_buf):m_gSaveFifo_buf(gSaveFifo_buf)
     {
-        m_strIp = strIp;
+        m_strID = strId;
         m_stopFlag = true;
         m_connectThread = NULL;
     }
@@ -135,6 +136,7 @@ public:
     void run();
     volatile  bool    m_stopFlag;
     QString     m_strIp;
+	QString     m_strID;
     device_buf_T* m_gSaveFifo_buf;
     DataConnectionThread*   m_connectThread;
     bool TongDate(UINT32 id);
@@ -144,9 +146,9 @@ public:
 class DataAnalyzeSaveDB:public QThread
 {
 public:
-    DataAnalyzeSaveDB(QString const& strIp,QString const& strDeviceID)
+    DataAnalyzeSaveDB(QString const& strID,QString const& strDeviceID)
     {
-        m_strIp = strIp;
+        m_strID = strID;
         m_stopFlag = true;
         m_strDeviceID = strDeviceID;
     }
@@ -157,7 +159,7 @@ public:
     }
     void run();
     volatile  bool    m_stopFlag;
-    QString     m_strIp;
+    QString     m_strID;
     QString     m_strDeviceID;
 
 };
@@ -199,6 +201,7 @@ public:
     bool    m_initFlag; //InitCANModule 初始化成功与否
     void run();
     QString m_strIp;//"192.168.1.1"类似 字符串
+	QString m_strID; //设备ID
     int    m_port;
     int m_cannum;
 

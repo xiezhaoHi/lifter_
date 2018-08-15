@@ -5,6 +5,8 @@
 #include<QThread>
 typedef struct experiment_struct
 {
+	int m_start; //开始或结束 0 结束 1开始
+	QString m_lifterID; //电梯ID
     int m_begin; //开始层数
     int m_end; //结束层数
     int m_type; // 周期类型 0,1 次数 天数

@@ -24,7 +24,7 @@ Config::~Config()
         }
     }
 
-    m_devcice_ipMap.clear(); //设备ip 映射 设备list
+    m_devcice_idMap.clear(); //设备ip 映射 设备list
     m_clientMap_ipMap.clear();
 }
 
@@ -148,7 +148,7 @@ bool Config::InitDeviceConfig()
      {
         if(!MyDatabase::GetInstance()->SelectData(strSqlList[index],m_config_list[index],m_config_list_num[index]))
         {
-              m_error = "执行sql语句错误!";
+            m_error = "执行sql语句错误!";
             return false;
          }
         if(0 == m_config_list_num[index] && index != config_client_config)
@@ -166,10 +166,12 @@ bool Config::InitDeviceConfig()
               QString strID = (*(m_config_list[config_observe_control_device][index]))[observe_control_device_id];
               QString strPort = (*(m_config_list[config_observe_control_device][index]))[observe_control_device_port];
                           //映射 ip 到整个设备的信息list
-              m_devcice_ipMap[strIp]=p ;
+              m_devcice_idMap[strID]=p;
 
-                          //映射 ID 到 设备ip
-              m_deviceID_to_ip_map[strID]= strIp;
+				//映射 ip+port 到 设备ID
+			  m_device_IPPort_ID_map[strIp + strPort] = strID;
+                          //映射 ID 到 设备id
+              m_deviceID_to_id_map[strID]= strID;
 
        /*
         *填充继电器类型设备表 m_jdq_device_to_ip_port
@@ -179,7 +181,7 @@ bool Config::InitDeviceConfig()
             ip_port ipPort;
             ipPort.m_strIp = strIp;
             ipPort.m_strPort = strPort.toInt();
-            m_jdq_device_to_ip_port[strIp] =ipPort;
+            m_jdq_device_to_ip_port[strID] =ipPort;
         }
       /*
        *填充传感器类型设备表 m_cgq_device_to_ip_port
@@ -189,7 +191,7 @@ bool Config::InitDeviceConfig()
               ip_port ipPort;
               ipPort.m_strIp = strIp;
               ipPort.m_strPort = strPort.toInt();
-              m_cgq_device_to_ip_port[strIp] =ipPort;
+              m_cgq_device_to_ip_port[strID] =ipPort;
           }
       /*
        *填充编码器类型设备表 m_bmq_device_to_ip_port
@@ -199,7 +201,7 @@ bool Config::InitDeviceConfig()
               ip_port ipPort;
               ipPort.m_strIp = strIp;
               ipPort.m_strPort = strPort.toInt();
-              m_bmq_device_to_ip_port[strIp] =ipPort;
+              m_bmq_device_to_ip_port[strID] =ipPort;
           }
       /*
        *填充电压电流 m_dydl_to_ip_port
@@ -209,7 +211,7 @@ bool Config::InitDeviceConfig()
               ip_port ipPort;
               ipPort.m_strIp = strIp;
               ipPort.m_strPort = strPort.toInt();
-              m_dydl_to_ip_port[strIp] =ipPort;
+              m_dydl_to_ip_port[strID] =ipPort;
           }
 
        }
@@ -219,8 +221,8 @@ bool Config::InitDeviceConfig()
       for(int index = 0; index < m_config_list_num[config_client_config];++index)
         {
              boost::shared_ptr<QStringList> p(new QStringList((*(m_config_list[config_client_config][index]))));
-              QString strIp = (*(m_config_list[config_client_config][index]))[client_config_address];
-              m_clientMap_ipMap[strIp]=p ;
+              QString strID = (*(m_config_list[config_client_config][index]))[client_config_id];
+              m_clientMap_ipMap[strID]=p ;
 
         }
 
@@ -255,7 +257,7 @@ bool Config::InitDeviceConfig()
              {
                  QString strID = child.attribute(QString("ID"));
                  QString strLink = child.attribute(QString("LINK"));
-                 m_deviceIp_byID_map[strRootID+strLink] = m_deviceID_to_ip_map[strRootID];
+                 m_deviceIp_byID_map[strRootID+strLink] = strRootID;
                  m_deviceID_to_do_map[strRootID+strLink] = strID;
                  child = child.nextSiblingElement();
               }
@@ -267,7 +269,7 @@ bool Config::InitDeviceConfig()
              {
                  QString strID = child.attribute(QString("ID"));
                  QString strLink = child.attribute(QString("LINK"));
-                 m_deviceIp_byID_map[strRootID+strLink] = m_deviceID_to_ip_map[strRootID];
+                 m_deviceIp_byID_map[strRootID+strLink] = strRootID;
                  m_deviceID_to_di_map[strRootID+strLink] = strID;
                  child = child.nextSiblingElement();
               }
@@ -307,8 +309,8 @@ bool Config::InitDeviceConfig()
              data.port = child.text().toInt();
 
              data.devtype = VCI_CANETTCP;
-             data.strIp = m_deviceID_to_ip_map[strRootID];
-             m_CANIp_to_config[data.strIp] = data;
+             
+             m_CANIp_to_config[strRootID] = data;
         }
          //编码器
          if(m_deviceID_map.contains(strID)
@@ -338,22 +340,64 @@ bool Config::InitDeviceConfig()
          //设备 外的配置项
          if(!m_deviceID_map.contains(strID))
          {
-             QDomDocument doc;
-             QString error,strData;
-              int row = 0, column = 0;
-             if(!doc.setContent((*m_config_list[config_device_config][index])[1], false, &error, &row, &column))
-                 return false;
-             QDomElement  firstRoot= doc.firstChildElement();
-             QDomElement child = firstRoot; //保存根节点
-             QString strRootID = firstRoot.attribute(QString("ID"));
-             if(CONFIG_DHXZ == strRootID)
-             {
-                 child = firstRoot.firstChildElement("DhxzID");
-                 if(!child.isNull())
-                      strData = child.text();
-                 UserBuffer::GetInstance()->WriteDhxzBuffer(strData);
-             }
+			 //电梯动画配置
+			 if (strID == CONFIG_DHXZ)
+			 {
+				 QDomDocument doc;
+				 QString error, strData;
+				 int row = 0, column = 0;
+				 if (!doc.setContent((*m_config_list[config_device_config][index])[1], false, &error, &row, &column))
+					 return false;
+				 QDomElement  firstRoot = doc.firstChildElement();
+				 QDomElement child = firstRoot; //保存根节点
+				 QString strRootID = firstRoot.attribute(QString("ID"));
+	
+				 child = firstRoot.firstChildElement("DhxzID");
+				 if (!child.isNull())
+					 strData = child.text();
+				 UserBuffer::GetInstance()->WriteDhxzBuffer(strData);
+				 
+			 }
+             
+			 //电梯楼层 --双笼 电梯  计数值 配置 
+			 if (strID == CONFIG_BMQ_JSZ)
+			 {
+				 QDomDocument doc;
+				 QString error, strData;
+				 int row = 0, column = 0;
+				 if (!doc.setContent((*m_config_list[config_device_config][index])[1], false, &error, &row, &column))
+					 return false;
+				 QDomElement  firstRoot = doc.firstChildElement();
+				 QDomElement child = firstRoot; //保存根节点
+				 QString strRootID = firstRoot.attribute(QString("ID"));
+				 {
+					 child = firstRoot.firstChildElement("floor");
+					 if (!child.isNull()) //最大楼层数
+						 strData = child.attribute(QString("max"));
+					 int floorMax = strData.toInt();
+					 //数据无效
+					 if (floorMax <= 0)
+						 return;
+					 lifterBmqJszCof* config = new lifterBmqJszCof;
+					 config->m_lifterBmqJsz = new int[floorMax];
+					 config->m_lifterBmqJszNum = floorMax;
+					 for (int index = 1; index <= floorMax; ++index)
+					 {
+						 //默认初始化
+						 config->m_lifterBmqJsz[index - 1] = 0;
 
+						 child = firstRoot.firstChildElement(QString("floor_%1").arg(index));
+						 if (!child.isNull()) //最大楼层数
+						 {
+							 strData = child.text();
+							 config->m_lifterBmqJsz[index - 1] = strData.toInt();
+						 }
+							 
+					 }
+					 //保存配置文件
+					 UserBuffer::GetInstance()->WriteLifterBmqBuffer(strRootID, config);
+				 }
+			 }
          }
      }
 
@@ -369,7 +413,7 @@ return true;
 QMap<QString,boost::shared_ptr<QStringList>>& Config::GetUserInfo(int flag )
 {
    if(0 == flag)
-       return m_devcice_ipMap;
+       return m_devcice_idMap;
 
   // if(1 == flag)
         return m_clientMap_ipMap;
@@ -381,11 +425,11 @@ QMap<QString,boost::shared_ptr<QStringList>>& Config::GetUserInfo(int flag )
 /*
  *返回 指定设备的 所属电梯ID
  */
-QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
+QString     Config::GetLifterIDByDeviceId(const QString &strID)
 {
-    if(m_devcice_ipMap.contains(strIp))
+    if(m_devcice_idMap.contains(strID))
     {
-       return m_devcice_ipMap[strIp]->at(observe_control_device_belongs); //所属电梯
+       return m_devcice_idMap[strID]->at(observe_control_device_belongs); //所属电梯
 
 //        QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_clientMap_ipMap.constBegin();
 //        for(; it != m_clientMap_ipMap.constEnd(); ++it)
@@ -442,11 +486,11 @@ QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
   * 获取设备 ID
   * 设备ip作为参数
   */
- QString Config::GetDeviceID(const QString &strIp)
+ QString Config::GetDeviceID(const QString &strIpPort)
  {
-     if(m_devcice_ipMap.contains(strIp) ) //设备中包含该设备
+     if(m_device_IPPort_ID_map.contains(strIpPort) ) //设备中包含该设备
      {
-         return m_devcice_ipMap[strIp]->at(observe_control_device_id);
+         return m_device_IPPort_ID_map[strIpPort];
       }
      return "";
  }
@@ -455,15 +499,12 @@ QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
   * 获取设备 标识  这是个什么设备
   * 遍历设备表 和客户端表 获取 连接用户的身份 并 保存m_deviceMap
   */
- int Config::GetDeviceFlag(const QString &strIp)
+ QString  Config::GetDeviceFlag(const QString &strIpPort)
  {
         //return m_devcice_ipMap[strIp];
-     QString str = GetDeviceID(strIp);
-     if(!str.isEmpty())
-     {
-        return m_deviceID_map[str.left(USER_ID_COUNT)];
-     }
-    return -1;
+     QString str = GetDeviceID(strIpPort);
+    
+    return str;
  }
 
  /*
@@ -481,16 +522,16 @@ QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
     return "";
  }
  /*
-  *指定 继电器关联设备ID 返回 继电器IP
+  *指定 继电器关联设备ID 返回 继电器ID
   * strID 为继电器ID加 DI DO 关联的设备ID
   */
- QString Config::GetDeviceIpByID(QString const& lifterBelongs,const QString &strID)
+ QString Config::GetDeviceIDByID(QString const& lifterBelongs,const QString &strID)
  {
 
      QString strBelongs = lifterBelongs; //所属电梯
      QString strDeviceId;
-      QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_devcice_ipMap.constBegin();
-      for(; it != m_devcice_ipMap.constEnd(); ++it)
+      QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_devcice_idMap.constBegin();
+      for(; it != m_devcice_idMap.constEnd(); ++it)
       {
           if(it.value()->at(observe_control_device_belongs) == strBelongs)  //设备所属电梯  相应的 管理client
           {
@@ -499,8 +540,7 @@ QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
                   return m_deviceIp_byID_map[strDeviceId+strID];
           }
       }
-//     if(m_deviceIp_byID_map.contains(strID))
-//        return m_deviceIp_byID_map[strID];
+
      return "";
  }
 
@@ -514,8 +554,8 @@ QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
 
      QString strBelongs = strBelongsID; //所属电梯
      QString strDeviceId;
-      QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_devcice_ipMap.constBegin();
-      for(; it != m_devcice_ipMap.constEnd(); ++it)
+      QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_devcice_idMap.constBegin();
+      for(; it != m_devcice_idMap.constEnd(); ++it)
       {
           if(it.value()->at(observe_control_device_belongs) == strBelongs)  //设备所属电梯  相应的 管理client
           {
@@ -535,15 +575,15 @@ QString     Config::GetLifterIDByDeviceIp(const QString &strIp)
   * strBelongsID 客户端 所属电梯ID
   *
   */
-// QMap<QString,boost::shared_ptr<QStringList>> m_devcice_ipMap; //设备ip 映射 设备list
+// QMap<QString,boost::shared_ptr<QStringList>> m_devcice_ipMap; //设备id 映射 设备list
 //         QMap<QString,boost::shared_ptr<QStringList>> m_clientMap_ipMap; //client ip 映射list
  QString Config::GetDOByDeviceID(QString const& strBelongsID,QString const& strID)
  {
    
     QString strBelongs = strBelongsID; //所属电梯
     QString strDeviceId;
-     QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_devcice_ipMap.constBegin();
-     for(; it != m_devcice_ipMap.constEnd(); ++it)
+     QMap<QString,boost::shared_ptr<QStringList>>::const_iterator it = m_devcice_idMap.constBegin();
+     for(; it != m_devcice_idMap.constEnd(); ++it)
      {
          if(it.value()->at(observe_control_device_belongs) == strBelongs)  //设备所属电梯  相应的 管理client
          {
@@ -626,7 +666,7 @@ QString Config::GetLifterIDByClientIp(QString const& strIp)
  * 制动
  * 返回 传感器 对应的 编码器ip
  */
-QString Config::GetCgqToBmqIp(QString const& strIp)
+QString Config::GetCgqToBmqID(QString const& strIp)
 {
     return "";
 }
@@ -634,12 +674,12 @@ QString Config::GetCgqToBmqIp(QString const& strIp)
  * 获取指定ip 编码器的配置项
  *
  */
-BMQCOf   Config::GetBmqConfig(QString const& strIp)
+BMQCOf   Config::GetBmqConfig(QString const& strID)
 {
     BMQCOf data;
     data.m_d = -1;
     data.m_p = -1;
-    QString strID = GetDeviceID(strIp);
+    
     if(m_bmqID_to_config.contains(strID))
     {
        return  m_bmqID_to_config[strID];
@@ -664,13 +704,15 @@ QString Config::GetDBConfigData(int flag)
 {
      QMap<int,QString>  retMap;
     QString strID ,strBelongs;
+	int bmqNUM = 0; //0标识 没有bmq
     for(int index = 0; index < m_config_list_num[config_observe_control_device];++index)
       {
              strID = (*(m_config_list[config_observe_control_device][index]))[observe_control_device_id];
              strBelongs = (*(m_config_list[config_observe_control_device][index]))[observe_control_device_belongs];
              if(strLifterID == strBelongs && strID.left(4).toInt() == flag)
              {
-                retMap[strID.right(2).toInt()] = strID;
+				 ++bmqNUM;
+                retMap[bmqNUM] = strID;
              }
       }
     return retMap;

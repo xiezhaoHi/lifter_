@@ -11,7 +11,7 @@ UserBuffer* UserBuffer::m_singleton = NULL;
 UserBuffer::UserBuffer()
 {
 
-m_database_queue_max = DATABASE_QUEUE_MAX;
+  m_database_queue_max = DATABASE_QUEUE_MAX;
 
 }
 //缓冲 清理
@@ -448,8 +448,12 @@ QStringList UserBuffer::ReadDeviceToClientMap(QString const& strLifterID)
 
     for(;begin != end; ++begin)
     {
-        if(strLifterID == Config::GetInstance()->GetLifterIDByDeviceIp(begin.key()))
-            retList.append(begin.value());
+		if (strLifterID == Config::GetInstance()->GetLifterIDByDeviceId(begin.key()))
+		{
+			retList.append(begin.value());
+			m_device_to_data[begin.key()] = QString("");//清空数据
+		}
+            
     }
     return retList;
 }
@@ -458,11 +462,11 @@ QStringList UserBuffer::ReadDeviceToClientMap(QString const& strLifterID)
  *写入数据   m_device_to_dh_data
  * 设备ip 关联 数据
  */
-void UserBuffer::WriteDeviceToDhData(QString const& strIp, QString const& strData)
+void UserBuffer::WriteDeviceToDhData(QString const& strID, QString const& strData)
 {
     boost::mutex::scoped_lock lock(m_device_to_dh_data_map_mutex);
 
-    m_device_to_dh_data[strIp] = strData;
+    m_device_to_dh_data[strID] = strData;
 
 }
 
@@ -480,8 +484,12 @@ QString  UserBuffer::ReadDeviceToDhData(QString const& strLifterID)
 
    for(;begin != end; ++begin)
    {
-       if(strLifterID == Config::GetInstance()->GetLifterIDByDeviceIp(begin.key()))
-           retList +=begin.value();
+	   if (strLifterID == Config::GetInstance()->GetLifterIDByDeviceId(begin.key()))
+	   {
+		   retList += begin.value();
+		   m_device_to_dh_data[begin.key()] = QString("");//清空数据
+	   }
+          
    }
    return retList;
 }
@@ -516,7 +524,18 @@ device_buf_T UserBuffer::PopCanDeviceQueue()
     return ret;
 }
 
-
+/*
+* 电梯每层 编码器 计数值配置
+* 电梯ID  与 计数值结构体
+*/
+void    UserBuffer::WriteLifterBmqBuffer(QString const& strLifterID, lifterBmqJszCof* data)
+{
+	m_lifterBmqJszCof[strLifterID] = data;
+}
+lifterBmqJszCof* UserBuffer::ReadLifterBmqBuffer(QString const& strLifterID)
+{
+	return m_lifterBmqJszCof[strLifterID];
+}
 
 /**************************************************/
 
@@ -533,59 +552,23 @@ QString UserBuffer::ReadDhxzBuffer()
     return m_dhxz_id;
 }
 
-/**************************************************/
-/*
- * 获取编码器相关计数值
- * strip 编码器ip
- * flag  上限位 下限位 每层的标识   BmqJsz
- * jsz 计数值
- */
-void    UserBuffer::SetBmqJsz(QString const& strIp,int const& flag,int const& jsz)
-{
-     boost::mutex::scoped_lock lock(m_mutex_bmq_zd);
-      if(!m_bmq_begin_jsz.contains(strIp))
-      {
-        QStringList list;
-
-        list[flag] = jsz;
-        m_bmq_begin_jsz[strIp] =list;
-      }
-      else
-      {
-        m_bmq_begin_jsz[strIp][flag] = jsz;
-      }
-}
-
-
-/*
- *获取 指定编码器 指定位置的 初始 计数值
- */
-
-int     UserBuffer::GetBmqJsz(QString const& strIp,int const& flag)
-{
-    boost::mutex::scoped_lock lock(m_mutex_bmq_zd);
-    QString strRet = m_bmq_begin_jsz[strIp][flag];
-    return strRet.toInt();
-}
-
-
 /*
  * 设置 当前 编码器 最新的计数值
  */
-void    UserBuffer::SetBmqNewestJsz(QString const& strIp,int const& jsz)
+void    UserBuffer::SetBmqNewestJsz(QString const& strID,int const& jsz)
 {
     boost::mutex::scoped_lock lock(m_mutex_bmq_zd);
-    m_bmq_newest_jsz[strIp] = jsz;
+    m_bmq_newest_jsz[strID] = jsz;
 }
 
 /*
  * 获取 指定编码器 最新的计数值
  */
-int     UserBuffer::GetBmqNewestJsz(QString const& strIp)
+int     UserBuffer::GetBmqNewestJsz(QString const& strID)
 {
     boost::mutex::scoped_lock lock(m_mutex_bmq_zd);
-    if(m_bmq_newest_jsz.contains(strIp))
-        return m_bmq_newest_jsz[strIp];
+    if(m_bmq_newest_jsz.contains(strID))
+        return m_bmq_newest_jsz[strID];
     return -1;
 }
 
@@ -630,24 +613,24 @@ double  UserBuffer::GetBmqZdjl(QString const& strIp)
  */
 //QQueue<response_data>   m_response_queue;
 //boost::mutex            m_response_queue_mutex;
-void    UserBuffer::PushResponseQueue(QString const& strIp,response_data const& data)
+void    UserBuffer::PushResponseQueue(QString const& strID,response_data const& data)
 {
     boost::mutex::scoped_lock lock(m_response_queue_mutex);
-    m_response_queue[strIp] = data;
+    m_response_queue[strID] = data;
 }
 
 /*
  * strIp  客户端ip
  * 返回 回复的 数据包
  */
-QString UserBuffer::PopResponseQueue(QString const& strIp)
+QString UserBuffer::PopResponseQueue(QString const& strID)
 {
     boost::mutex::scoped_lock lock(m_response_queue_mutex);
     QString strRet;
-    if(m_response_queue.contains(strIp) && !m_response_queue[strIp].strData.isEmpty())
+    if(m_response_queue.contains(strID) && !m_response_queue[strID].strData.isEmpty())
     {
-        strRet = m_response_queue[strIp].strData;
-        m_response_queue[strIp].strData = "";
+        strRet = m_response_queue[strID].strData;
+        m_response_queue[strID].strData = "";
     }
 
     return strRet;
