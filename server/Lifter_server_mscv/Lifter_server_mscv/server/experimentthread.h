@@ -3,11 +3,12 @@
 
 #include"config/config.h"
 #include<QThread>
+
 typedef struct experiment_struct
 {
 	int m_start; //开始或结束 0 结束 1开始
 	QString m_lifterID; //电梯ID
-    int m_begin; //开始层数
+    int m_begin; //开始层数 从 1 开始:例如 1-7
     int m_end; //结束层数
     int m_type; // 周期类型 0,1 次数 天数
     int m_times; //周期数
@@ -26,7 +27,7 @@ public:
     void run();
     experimentData m_data;
     QString m_lifterID;
-
+	
 };
 
 #endif // EXPERIMENTTHREAD_H

@@ -103,6 +103,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="server\businesssession.cpp" />
     <ClCompile Include="server\ccanmoduleserver.cpp" />
+    <ClCompile Include="server\CGoFloor.cpp" />
     <ClCompile Include="server\config\config.cpp" />
     <ClCompile Include="server\connections.cpp" />
     <ClCompile Include="server\database_service\connectionpool.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="server\ansycservice.h" />
     <ClInclude Include="server\businesssession.h" />
     <ClInclude Include="server\ccanmoduleserver.h" />
+    <ClInclude Include="server\CGoFloor.h" />
     <ClInclude Include="server\config\config.h" />
     <ClInclude Include="server\connections.h" />
     <ClInclude Include="server\database_service\connectionpool.h" />

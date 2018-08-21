@@ -91,7 +91,7 @@ bool Config::InitConfig(QString strPath)
 
     for(int index = device_cgq; index<device_max; ++index)
     {
-        m_deviceID_map[QString("%1").arg(index)] = index;
+        m_deviceID_map[QString("%1").arg(device_begin_ID+index)] = index;
     }
 
    return true;
@@ -377,7 +377,7 @@ bool Config::InitDeviceConfig()
 					 int floorMax = strData.toInt();
 					 //数据无效
 					 if (floorMax <= 0)
-						 return;
+						 return false;
 					 lifterBmqJszCof* config = new lifterBmqJszCof;
 					 config->m_lifterBmqJsz = new int[floorMax];
 					 config->m_lifterBmqJszNum = floorMax;

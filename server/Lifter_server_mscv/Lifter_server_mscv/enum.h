@@ -52,13 +52,13 @@ enum enum_detection
 #define device_begin_ID 1000
 enum device_name_config
 {
-    device_cgq = 1001, //传感器设备
-    device_bmq = 1002, //编码器
+    device_cgq = 1, //传感器设备
+    device_bmq , //编码器
     device_jdq , //继电器
     device_can, //CAN模块设备
     device_dydl, //电压电流
     device_gss, //钢丝绳
-    device_max 
+    device_max =6
 };
 
 /*

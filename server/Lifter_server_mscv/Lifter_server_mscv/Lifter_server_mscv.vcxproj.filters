@@ -62,6 +62,9 @@
     <Filter Include="server\task_service">
       <UniqueIdentifier>{0bf7ef81-9a06-40a2-9cb4-6dececcc9199}</UniqueIdentifier>
     </Filter>
+    <Filter Include="server\goFloor">
+      <UniqueIdentifier>{88a4da79-7ad9-4144-b4ff-0f4b82946bd0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -150,6 +153,9 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_server_manager.cpp">
       <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="server\CGoFloor.cpp">
+      <Filter>server\goFloor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +247,9 @@
     </ClInclude>
     <ClInclude Include="win_server.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="server\CGoFloor.h">
+      <Filter>server\goFloor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

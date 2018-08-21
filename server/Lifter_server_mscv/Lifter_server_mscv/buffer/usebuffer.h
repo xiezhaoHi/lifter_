@@ -52,6 +52,7 @@ typedef struct  SendMessageData
 typedef struct lifterBmqJszCof
 {
 	//电梯每层编码器计数值 数组
+	//从0 开始  例如:1-7楼 对于索引为0-6
 	int* m_lifterBmqJsz;
 	//数组大小
 	int  m_lifterBmqJszNum;
@@ -90,20 +91,6 @@ public:
 
 
     /**************************************************/
-
-    /*
-     * 获取编码器相关计数值
-     * strip 编码器ip
-     * flag  上限位 下限位 每层的标识
-     * jsz 计数值
-     */
-    void    SetBmqJsz(QString const& strIp,int const& flag,int const& jsz);
-
-    /*
-     *获取 指定编码器 指定位置的 初始 计数值
-     */
-
-    int     GetBmqJsz(QString const& strIp,int const& flag);
 
 
     /*
